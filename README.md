@@ -1,2 +1,2 @@
 # Shiny_ML
-Shiny app visualizing ML methods
+Shiny app visualizing ML methods.
