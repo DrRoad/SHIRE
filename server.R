@@ -1,11 +1,19 @@
 
+insurance <- read.csv("insurance.csv")
+
 server <- function(input, output) {
-  set.seed(122)
-  histdata <- rnorm(500)
-  
-  output$plot1 <- renderPlot({
-    data <- histdata[seq_len(input$slider)]
-    hist(data)
-  })
-}
  
+ output$hist <- renderPlot({
+	hist(insurance$charges)
+ })
+
+ output$summary <- renderPrint({
+   summary(insurance$charges)
+ })
+ 
+ output$stats <- renderPrint({
+	summary(insurance)
+ })
+
+
+}
