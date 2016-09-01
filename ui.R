@@ -1,0 +1,44 @@
+## app.R ##
+library(shiny)
+library(shinydashboard)
+
+ui <- dashboardPage(skin="green",
+  
+  dashboardHeader(title = "ML Visualization proj.",titleWidth = 350),
+
+  
+  dashboardSidebar(
+    menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+    menuItem("Widgets", tabName = "widgets", icon = icon("th"))
+  ),
+ 
+
+  ## Body content
+  dashboardBody(
+    tags$head(tags$style(HTML('
+      .main-header .logo {
+        font-family: "Georgia", Times, "Times New Roman", serif;
+        font-weight: bold;
+        font-size: 24px;
+      }
+    '))),
+    tabItems(
+      # First tab content
+      tabItem(tabName = "dashboard",
+              fluidRow(
+                box(plotOutput("plot1", height = 250)),
+                
+                box(
+                  title = "Controls",
+                  sliderInput("slider", "Number of observations:", 1, 100, 50)
+                )
+              )
+      ),
+      
+      # Second tab content
+      tabItem(tabName = "widgets",
+              h2("Widgets tab content")
+      )
+    )
+  )
+)
