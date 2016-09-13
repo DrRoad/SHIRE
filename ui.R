@@ -10,18 +10,39 @@ plots <- c(
 
 
 vars <- c(
-  "Charges" = "charges",
-  "Age" = "age",
+  "charges" = "charges",
+  "age" = "age",
   "BMI" = "bmi",
-  "Children" = "children"
+  "children" = "children"
 )
 
 
  
-ui <- fluidPage(navbarPage(title = p(style ="font-family:Impact","Linear Regression"),
+ui <- fluidPage(navbarPage(title = p(style =" font-family:Impact","Linear Regression"),
     
-    tabPanel(title = "Model producer"),
-
+    # model generator 
+                           
+    tabPanel(title = "Model generator",
+      
+       fluidRow(
+          column(6, uiOutput("modelPage")),
+          column(6,
+                 conditionalPanel(
+                   condition = "input.action == TRUE",
+                   plotOutput("model"))
+          )
+       ),
+       fluidRow(
+          column(3,
+            fileInput("file1", "Choose CSV File",multiple = FALSE, 
+                      accept = c("text/csv","text/comma-separated-values,text/plain",".csv"),
+                      width = '200px')
+            ),
+          column(3,checkboxInput("header", "Header", TRUE),
+                 textOutput("result"))
+         )
+    ),
+    
     
     # Data exploration.
     

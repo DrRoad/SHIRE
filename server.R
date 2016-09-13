@@ -1,13 +1,29 @@
 
+plots <- c(
+  "Histogram" = "hist",
+  "Boxplot" = "boxplot",
+  "Scatter" = "scatter"
+)
+
+
+vars <- c(
+  "charges" = "charges",
+  "age" = "age",
+  "BMI" = "bmi",
+  "children" = "children"
+)
+
 insurance <- read.csv("insurance.csv")
 
 
 server <- function(input, output, session) {
 
+  
+  ###From here, Data Explorer
   plot <- reactive(input$plotType)
   vari <- reactive(input$variable)
   
-  #histogram  
+  # histogram  
   output$plot <- renderPlot({
     
     if(plot() == "hist"){
@@ -61,5 +77,52 @@ server <- function(input, output, session) {
  output$dataTable <- renderDataTable(
    insurance, options = list(pageLength = 5)
  )
+ 
+ 
+ 
+ 
+ 
+ ### From here, Model generator 
 
-}
+   output$result <- renderText({
+       
+       print("File uploaded")
+   })
+   
+   output$model <- renderPlot({
+     if(input$action){hist(insurance$charges)}
+   })
+   
+   
+   output$modelPage <- renderUI({
+     inFile <- input$file1
+     
+     if(is.null(inFile))
+       return(NULL)
+     
+     read.csv(inFile$datapath, header = input$header)
+    
+     #  A defendent variable
+     wellPanel(
+       radioButtons("dfvari", 
+                    label = "DV(Defendent variable)", 
+                    choices = vars, 
+                    selected = "charges", 
+                    inline=TRUE, 
+                    width = '300px'),
+       
+       
+       
+       #  Explanatory variables. 
+       radioButtons("exvaris", "EV(Explanatory variables):",
+                    c("all-except DV","except factors","select"), inline = TRUE),
+       
+       conditionalPanel(
+         condition = "input.exvaris == 'select'",
+         checkboxGroupInput("selectedExvaris","Select EVs", vars, inline= TRUE)
+       ),
+       actionButton("action","Generate Model ",icon("refresh"))
+     )
+   })
+
+ }
