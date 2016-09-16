@@ -20,11 +20,10 @@ vars <- c(
 
 ui <- fluidPage(navbarPage(title = p(style =" font-family:Impact","Linear Regression"),
                            
-   # model generator 
+  # model generator 
                            
   tabPanel(title = "Model generator",
                                     
-        
            
            fluidRow(
              column(3,
@@ -39,14 +38,18 @@ ui <- fluidPage(navbarPage(title = p(style =" font-family:Impact","Linear Regres
            
            fluidRow(
                  column(6, uiOutput("modelPage")),
-                 column(6,
+                 column(6, 
                         conditionalPanel(
-                            condition = "input.action == TRUE",
-                            plotOutput("model"))
-                        )
+                          condition = "input$action == TRUE",
+                          plotOutput("model")
+                        ))
            )
+           
+           
+           
         ),
    
+  
         # Data exploration.
                            
          tabPanel("Data explorer",

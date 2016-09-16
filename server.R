@@ -83,6 +83,7 @@ server <- function(input, output, session) {
   
   
   
+  
   ### From here, Model generator 
   
   output$modelPage <- renderUI({
@@ -95,15 +96,27 @@ server <- function(input, output, session) {
       print("File uploaded")
     })
     
+    
+    # data read and analyze
+    data <- read.csv(inFile$datapath, header = input$header)
+    
+    output$str <- renderPrint({
+      if(!is.null(data)){str(data)}
+    })
+    
     output$model <- renderPlot({
       if(input$action){hist(insurance$charges)}
     })
     
     
-    read.csv(inFile$datapath, header = input$header)
-    
     #  A defendent variable
-    wellPanel(
+    
+    wellPanel(style = "background-color: white",
+      
+      h4(p(style ="font-family:Impact","Data Types")),
+      verbatimTextOutput("str"),
+      br(),
+      h4(p(style ="font-family:Impact","Value Selector")),
       radioButtons("dfvari", 
                    label = "DV(Defendent variable)", 
                    choices = vars, 
