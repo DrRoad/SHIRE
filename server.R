@@ -7,81 +7,10 @@ plots <- c(
 )
 
 
-vars <- c(
-  "charges" = "charges",
-  "age" = "age",
-  "BMI" = "bmi",
-  "children" = "children"
-)
-
 insurance <- read.csv("insurance.csv")
 
 
 server <- function(input, output, session) {
-  
-  
-  ###From here, Data Explorer
-  plot <- reactive(input$plotType)
-  vari <- reactive(input$variable)
-  
-  # histogram  
-  output$plot <- renderPlot({
-    
-    if(plot() == "hist"){
-      switch(vari(),
-             charges = hist(insurance$charges, main = paste("Histogram of",vari())),
-             age = hist(insurance$age, main = paste("Histogram of",vari())),
-             bmi = hist(insurance$bmi, main = paste("Histogram of",vari())),
-             children = hist(insurance$children, main = paste("Histogram of",vari()))
-      )
-    }
-    else if(plot() == "scatter"){
-      pairs(insurance[c("age","bmi", "children", "charges")], pch= c(1,2,3), main="Scatter plots")
-      
-    }
-    else if(plot() == "boxplot"){
-      switch(vari(),
-             charges = boxplot(insurance$charges, main = paste("Boxplot of",vari()), notch =TRUE),
-             age = boxplot(insurance$age, main = paste("Boxplot of",vari()), notch =TRUE),
-             bmi = boxplot(insurance$bmi, main = paste("Boxplot of",vari()), notch =TRUE),
-             children = boxplot(insurance$children, main = paste("Boxplot of",vari()), notch =TRUE)
-      )
-    }
-    
-  })
-  
-  
-  
-  #various informations
-  output$summary <- renderPrint({
-    if(vari() == "age") 
-      summary(insurance$age)
-    
-    else if(vari() == "charges")
-      summary(insurance$charges)
-    
-    else if(vari() == "bmi")
-      summary(insurance$bmi)
-    
-    else if(vari() == "children")
-      summary(insurance$children)
-  })
-  
-  output$table <- renderPrint({
-    table(insurance$region)
-  })
-  output$col <- renderPrint({
-    cor(insurance[c("age", "bmi", "children", "charges")])
-  })
-  
-  #data table
-  output$dataTable <- renderDataTable(
-    insurance, options = list(pageLength = 5)
-  )
-  
-  
-  
-  
   
   
   ### From here, Model generator 
@@ -100,6 +29,11 @@ server <- function(input, output, session) {
     # data read and analyze
     data <- read.csv(inFile$datapath, header = input$header)
     
+
+    #var setting.
+    vars <- colnames(data)
+
+
     output$str <- renderPrint({
       if(!is.null(data)){str(data)}
     })
@@ -108,34 +42,101 @@ server <- function(input, output, session) {
       if(input$action){hist(insurance$charges)}
     })
     
+    observeEvent(input$dfvari,{
+        varExceptDv <- setdiff(vars, input$dfvari)
+    })
+
+    wellPanel(style ="background-color:white",
+              
+              #  A defendent variable
+              h4(p(style ="font-family:Impact","Value Selector")),
+              selectInput("dfvari", 
+                          label = "DV(Defendent variable)", 
+                          choices = vars, 
+                          selected = vars[1] 
+              ),
+              
+              #  Explanatory variables. 
+              selectInput("exvaris", "EV(Explanatory variables):",
+                          c("all-except DV","except factors","select")),
+              
+              conditionalPanel(
+                condition = "input.exvaris == 'select'",
+                checkboxGroupInput("selectedExvaris","Select EVs", setdiff(vars, input$dfvari))
+              ),
+              actionButton("action","Generate Model ",icon("refresh")),
+              br(),br(),
+              h4(p(style ="font-family:Impact","Data Types")),
+              verbatimTextOutput("str")
+              
+      )
+  })
+
+  ###From here, Data Explorer
+ 
+  output$dataPage <- renderUI({
     
-    #  A defendent variable
+      inFile <- input$file1
+      
+      if(is.null(inFile))
+        return(NULL)
     
-    wellPanel(style = "background-color: white",
+      plot <- reactive(input$plotType)
+      vari <- reactive(input$variable)
       
-      h4(p(style ="font-family:Impact","Data Types")),
-      verbatimTextOutput("str"),
-      br(),
-      h4(p(style ="font-family:Impact","Value Selector")),
-      radioButtons("dfvari", 
-                   label = "DV(Defendent variable)", 
-                   choices = vars, 
-                   selected = "charges", 
-                   inline=TRUE, 
-                   width = '300px'),
+      # histogram  
+      output$plot <- renderPlot({
+        
+        if(plot() == "hist"){
+          switch(vari(),
+                 charges = hist(insurance$charges, main = paste("Histogram of",vari())),
+                 age = hist(insurance$age, main = paste("Histogram of",vari())),
+                 bmi = hist(insurance$bmi, main = paste("Histogram of",vari())),
+                 children = hist(insurance$children, main = paste("Histogram of",vari()))
+          )
+        }
+        else if(plot() == "scatter"){
+          pairs(insurance[c("age","bmi", "children", "charges")], pch= c(1,2,3), main="Scatter plots")
+          
+        }
+        else if(plot() == "boxplot"){
+          switch(vari(),
+                 charges = boxplot(insurance$charges, main = paste("Boxplot of",vari()), notch =TRUE),
+                 age = boxplot(insurance$age, main = paste("Boxplot of",vari()), notch =TRUE),
+                 bmi = boxplot(insurance$bmi, main = paste("Boxplot of",vari()), notch =TRUE),
+                 children = boxplot(insurance$children, main = paste("Boxplot of",vari()), notch =TRUE)
+          )
+        }
+      })
       
+      #various informations
+      output$summary <- renderPrint({
+        if(vari() == "age") 
+          summary(insurance$age)
+        
+        else if(vari() == "charges")
+          summary(insurance$charges)
+        
+        else if(vari() == "bmi")
+          summary(insurance$bmi)
+        
+        else if(vari() == "children")
+          summary(insurance$children)
+      })
       
+      output$table <- renderPrint({
+        table(insurance$region)
+      })
       
-      #  Explanatory variables. 
-      radioButtons("exvaris", "EV(Explanatory variables):",
-                   c("all-except DV","except factors","select"), inline = TRUE),
+      output$col <- renderPrint({
+        cor(insurance[c("age", "bmi", "children", "charges")])
+      })
       
-      conditionalPanel(
-        condition = "input.exvaris == 'select'",
-        checkboxGroupInput("selectedExvaris","Select EVs", vars, inline= TRUE)
-      ),
-      actionButton("action","Generate Model ",icon("refresh"))
-    )
+      #data table
+      output$dataTable <- renderDataTable(
+        insurance, options = list(pageLength = 5)
+      )
+    
   })
   
 }

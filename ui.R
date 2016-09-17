@@ -23,36 +23,38 @@ ui <- fluidPage(navbarPage(title = p(style =" font-family:Impact","Linear Regres
   # model generator 
                            
   tabPanel(title = "Model generator",
-                                    
+       
+      sidebarLayout(
+          
+          sidebarPanel(
+            
+            wellPanel(style = "background-color: white",
+              fileInput("file1", "Choose CSV File",multiple = FALSE, 
+                                accept = c("text/csv","text/comma-separated-values,text/plain",".csv"),
+                                width = '200px'),
+              checkboxInput("header", "Header", TRUE)
+            ),
+                      
+            uiOutput("modelPage")
+          
+          ),
+          mainPanel(
+            conditionalPanel(
+              condition = "input$action == TRUE",
+              plotOutput("model")
+            )
+          )
+          
+        )                            
            
-           fluidRow(
-             column(3,
-                    fileInput("file1", "Choose CSV File",multiple = FALSE, 
-                              accept = c("text/csv","text/comma-separated-values,text/plain",".csv"),
-                              width = '200px')
-             ),
-             column(3,
-                    checkboxInput("header", "Header", TRUE),
-                    textOutput("result"))
-           ),
-           
-           fluidRow(
-                 column(6, uiOutput("modelPage")),
-                 column(6, 
-                        conditionalPanel(
-                          condition = "input$action == TRUE",
-                          plotOutput("model")
-                        ))
-           )
-           
-           
-           
+          
         ),
    
   
         # Data exploration.
                            
          tabPanel("Data explorer",
+                  uiOutput("dataPage"),
                   fluidRow(
                           column(7, 
                                   column(5, selectInput("plotType", "Plot Type",plots)),
