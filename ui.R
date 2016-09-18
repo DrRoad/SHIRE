@@ -34,9 +34,20 @@ ui <- fluidPage(navbarPage(title = p(style =" font-family:Impact","Linear Regres
                                 width = '200px'),
               checkboxInput("header", "Header", TRUE)
             ),
-                      
-            uiOutput("modelPage")
-          
+            wellPanel(style ="background-color:white",
+              h4(p(style ="font-family:Impact","Value Selector")),           
+              uiOutput("modelPage"),
+              #  Explanatory variables. 
+              selectInput("exvaris", "EV(Explanatory variables):",c("all-except DV","except factors","select")),
+              conditionalPanel(
+                  condition = "input.exvaris == 'select'",
+                  uiOutput("modelPage2"))
+              ,
+              actionButton("action","Generate Model ",icon("refresh")),
+              br(),br(),
+              h4(p(style ="font-family:Impact","Data Types")),
+              verbatimTextOutput("str")
+            )
           ),
           mainPanel(
             conditionalPanel(

@@ -1,5 +1,3 @@
-
-
 plots <- c(
   "Histogram" = "hist",
   "Boxplot" = "boxplot",
@@ -13,10 +11,9 @@ insurance <- read.csv("insurance.csv")
 server <- function(input, output, session) {
   
   
-  ### From here, Model generator 
-  
+  ### From here, Model generator
   output$modelPage <- renderUI({
-    inFile <- input$file1
+    inFile <- input$file1 
     
     if(is.null(inFile))
       return(NULL)
@@ -24,53 +21,37 @@ server <- function(input, output, session) {
     output$result <- renderText({
       print("File uploaded")
     })
-    
-    
+
     # data read and analyze
-    data <- read.csv(inFile$datapath, header = input$header)
-    
-
+    data <<- read.csv(inFile$datapath, header = input$header)  
     #var setting.
-    vars <- colnames(data)
-
-
+    vars <<- colnames(data)
+    
     output$str <- renderPrint({
       if(!is.null(data)){str(data)}
     })
-    
-    output$model <- renderPlot({
-      if(input$action){hist(insurance$charges)}
-    })
-    
-    observeEvent(input$dfvari,{
-        varExceptDv <- setdiff(vars, input$dfvari)
-    })
 
-    wellPanel(style ="background-color:white",
-              
-              #  A defendent variable
-              h4(p(style ="font-family:Impact","Value Selector")),
-              selectInput("dfvari", 
-                          label = "DV(Defendent variable)", 
-                          choices = vars, 
-                          selected = vars[1] 
-              ),
-              
-              #  Explanatory variables. 
-              selectInput("exvaris", "EV(Explanatory variables):",
-                          c("all-except DV","except factors","select")),
-              
-              conditionalPanel(
-                condition = "input.exvaris == 'select'",
-                checkboxGroupInput("selectedExvaris","Select EVs", setdiff(vars, input$dfvari))
-              ),
-              actionButton("action","Generate Model ",icon("refresh")),
-              br(),br(),
-              h4(p(style ="font-family:Impact","Data Types")),
-              verbatimTextOutput("str")
-              
-      )
+    #  A defendent variable    
+    selectInput("dfvari", 
+         label = "DV(Defendent variable)", 
+         choices = vars, 
+         selected = vars[1] 
+    )
+
   })
+
+  
+    
+  output$model <- renderPlot({
+      if(input$action){hist(insurance$charges)}
+  })
+
+  output$modelPage2 <- renderUI({
+
+    checkboxGroupInput("selectedExvaris","Select EVs", setdiff(vars, input$dfvari))
+
+  })
+
 
   ###From here, Data Explorer
  
