@@ -35,25 +35,30 @@ ui <- fluidPage(navbarPage(title = p(style =" font-family:Impact","Linear Regres
               checkboxInput("header", "Header", TRUE)
             ),
             wellPanel(style ="background-color:white",
-              h4(p(style ="font-family:Impact","Value Selector")),           
+              h4(p(style ="font-family:Impact","Value Selector")),
               uiOutput("modelPage"),
-              #  Explanatory variables. 
-              selectInput("exvaris", "EV(Explanatory variables):",c("all-except DV","except factors","select")),
+              uiOutput("modelPage2"),
               conditionalPanel(
                   condition = "input.exvaris == 'select'",
-                  uiOutput("modelPage2"))
+                  uiOutput("modelPage3"))
               ,
-              actionButton("action","Generate Model ",icon("refresh")),
+              uiOutput("modelPage4"),
               br(),br(),
               h4(p(style ="font-family:Impact","Data Types")),
-              verbatimTextOutput("str")
+              uiOutput("modelPage5"),
+              br(),
+              h4(p(style ="font-family:Impact","Model logs")),
+              br()
             )
           ),
           mainPanel(
-            conditionalPanel(
-              condition = "input$action == TRUE",
-              plotOutput("model")
-            )
+              h4(p(style ="font-family:Impact","Model Visualization")),
+              uiOutput("modelPage6"),br(),
+              textInput("tunnedModel", "Tunning Model", "Model"),
+              uiOutput("generateButton"),
+              br(),
+              h4(p(style ="font-family:Impact","Model Accuracy")),
+              uiOutput("modelPage7")
           )
           
         )                            

@@ -7,52 +7,171 @@ plots <- c(
 
 insurance <- read.csv("insurance.csv")
 
+data <- data.frame()
+vars <- c()
+
 
 server <- function(input, output, session) {
   
-  
+  ######################################################
   ### From here, Model generator
+
+  #DV Selector
   output$modelPage <- renderUI({
+    inFile <- input$file1 
+    
+    if(is.null(inFile)){
+      output$noData <- renderText({
+        "No Data"
+      })
+      verbatimTextOutput("noData")
+    }
+    else{
+      # data read and analyze
+      data <<- read.csv(inFile$datapath, header = input$header)  
+      #var setting.
+      vars <<- colnames(data)
+
+      output$str <- renderPrint({
+        if(!is.null(data)){str(data)}
+      })
+      #  A defendent variable    
+      selectInput("dfvari", 
+           label = "DV(Defendent variable)", 
+           choices = vars, 
+           selected = vars[1] 
+      )
+    }
+
+  })
+
+  #EVs choices
+  output$modelPage2 <- renderUI({
     inFile <- input$file1 
     
     if(is.null(inFile))
       return(NULL)
     
-    output$result <- renderText({
-      print("File uploaded")
-    })
+    evChoice <- reactive(input$exvaris)
 
-    # data read and analyze
-    data <<- read.csv(inFile$datapath, header = input$header)  
-    #var setting.
-    vars <<- colnames(data)
-    
-    output$str <- renderPrint({
-      if(!is.null(data)){str(data)}
-    })
+    #  Explanatory variables. 
+    selectInput("exvaris", "EV(Explanatory variables):",c("all","except_factors","select"))
 
-    #  A defendent variable    
-    selectInput("dfvari", 
-         label = "DV(Defendent variable)", 
-         choices = vars, 
-         selected = vars[1] 
-    )
+
+    #if(evChoice() == "all")
+    #    evs <<- setdiff(vars, input$dfvari)
+
+    #else if(evChoice() == "except_factors") 
+    #    evs <<- 
+
+    #else if(evChoice() == "all")
 
   })
-
   
-    
-  output$model <- renderPlot({
-      if(input$action){hist(insurance$charges)}
-  })
-
-  output$modelPage2 <- renderUI({
+  #EVs Selector  
+  output$modelPage3 <- renderUI({
 
     checkboxGroupInput("selectedExvaris","Select EVs", setdiff(vars, input$dfvari))
 
   })
 
+  #Submit EVs button
+  output$modelPage4 <- renderUI({
 
+    inFile <- input$file1 
+    
+    if(is.null(inFile))
+      return(NULL)
+      
+    actionButton("submit","Submit EVs", icon("apple", lib = "glyphicon"))
+  })
+
+  #check the data 
+  output$modelPage5 <- renderUI({
+
+    inFile <- input$file1 
+    
+    if(is.null(inFile)){
+      output$noData2 <- renderText({
+        "No Data"
+      })
+      verbatimTextOutput("noData2")
+    }
+    else{
+      verbatimTextOutput("str")
+    }
+  })
+
+  #model visualization
+  output$modelPage6 <- renderUI({
+    inFile <- input$file1 
+    
+    if(is.null(inFile)){
+      output$noData3 <- renderText({
+        "No Model"
+      })
+      verbatimTextOutput("noData3")
+    }
+    else{
+     conditionalPanel(
+                condition = "input$action == TRUE",
+                plotOutput("model")
+              )
+    }
+  })
+
+
+  #model accuracy
+  output$modelPage7 <- renderUI({
+    inFile <- input$file1 
+    
+    if(is.null(inFile)){
+      output$noData4 <- renderText({
+        "Generate Model, please."
+      })
+      verbatimTextOutput("noData4")
+    }
+    else{
+      output$modelAcc <- renderPrint({
+        summary(data)
+      })
+      verbatimTextOutput("modelAcc")
+    }
+  })
+
+  #model generator button
+  output$generateButton <- renderUI({
+    inFile <- input$file1 
+    
+    if(is.null(inFile))
+      return(NULL)
+
+    actionButton("action","Generate Model", icon("grain", lib = "glyphicon"))
+  })
+
+  # EVs receiver
+  output$evReceiver <- renderUI({
+
+    
+
+  })
+
+
+  # Temporal sample model image
+  output$model <- renderPlot({
+      if(input$action){hist(insurance$charges)}
+  })
+
+
+  output$value <- renderText({ input$tunnedModel })
+
+
+
+
+
+
+
+  #######################################################
   ###From here, Data Explorer
  
   output$dataPage <- renderUI({
