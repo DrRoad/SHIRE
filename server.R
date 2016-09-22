@@ -16,8 +16,16 @@ server <- function(input, output, session) {
   ######################################################
   ### From here, Model generator
 
+  
+  #어떤 형식의 ev인지 선택
+  evMethod <<- reactive(input$exvaris)
+  #checkboxGroup에서 받아온 evs.
+  selectedEvs <<- reactive(input$evSelected)
+  selectedDv <<- reactive(input$dfvari)
+
+
   #DV Selector
-  output$modelPage <- renderUI({
+  output$dvSelector <- renderUI({
     inFile <- input$file1 
     
     if(is.null(inFile)){
@@ -31,52 +39,55 @@ server <- function(input, output, session) {
       data <<- read.csv(inFile$datapath, header = input$header)  
       #var setting.
       vars <<- colnames(data)
+      #except_factors
+      except_factors <<- colnames(data)
 
       output$str <- renderPrint({
         if(!is.null(data)){str(data)}
       })
+
+      i <- 1
+      
+      while( i <= length(vars)){
+          if(is.factor(data[,vars[i]])){
+            except_factors <<- setdiff(except_factors, vars[i])
+          }
+          i<- i+1   
+      }
+ 
       #  A defendent variable    
       selectInput("dfvari", 
            label = "DV(Defendent variable)", 
-           choices = vars, 
-           selected = vars[1] 
+           choices = except_factors, 
+           selected = except_factors[1] 
       )
     }
 
   })
+  
 
-  #EVs choices
-  output$modelPage2 <- renderUI({
+
+  #EV Method choices
+  output$evChoice <- renderUI({
     inFile <- input$file1 
     
     if(is.null(inFile))
       return(NULL)
-    
-    evChoice <- reactive(input$exvaris)
 
     #  Explanatory variables. 
     selectInput("exvaris", "EV(Explanatory variables):",c("all","except_factors","select"))
 
-
-    #if(evChoice() == "all")
-    #    evs <<- setdiff(vars, input$dfvari)
-
-    #else if(evChoice() == "except_factors") 
-    #    evs <<- 
-
-    #else if(evChoice() == "all")
-
   })
-  
-  #EVs Selector  
-  output$modelPage3 <- renderUI({
 
-    checkboxGroupInput("selectedExvaris","Select EVs", setdiff(vars, input$dfvari))
+  #EVs Selector  
+  output$evSelector <- renderUI({
+
+    checkboxGroupInput("evSelected","Select EVs", setdiff(vars, input$dfvari))
 
   })
 
   #Submit EVs button
-  output$modelPage4 <- renderUI({
+  output$evButton <- renderUI({
 
     inFile <- input$file1 
     
@@ -87,7 +98,7 @@ server <- function(input, output, session) {
   })
 
   #check the data 
-  output$modelPage5 <- renderUI({
+  output$dataType <- renderUI({
 
     inFile <- input$file1 
     
@@ -103,7 +114,7 @@ server <- function(input, output, session) {
   })
 
   #model visualization
-  output$modelPage6 <- renderUI({
+  output$modelVis <- renderUI({
     inFile <- input$file1 
     
     if(is.null(inFile)){
@@ -120,9 +131,47 @@ server <- function(input, output, session) {
     }
   })
 
+  # tunning model textbox 
+  output$tunningBox <- renderUI({
+    inFile <- input$file1 
+    
+    if(is.null(inFile)){
+      return (NULL)
+    }
+
+
+    else{
+
+      model = "lm("
+
+      model = paste(model, selectedDv(), "~") 
+    
+      if(evMethod() == "all")
+          evs <<- "."
+
+      else if(evMethod() == "except_factors") 
+          evs <<- setdiff(except_factors, selectedDv()) 
+
+      else if(evMethod() == "select")
+          evs <<- selectedEvs
+
+      i <- 1
+      while( i <= length(evs)){
+        if(i==1)
+          model = paste(model, evs[i])  
+        else
+          model = paste(model, "+",evs[i])
+        i<- i+1   
+      }
+      tempModel = paste(model,")")
+
+      textInput("tunnedModel", "Tunning Model", tempModel,width = '500px')
+    }
+  })
+
 
   #model accuracy
-  output$modelPage7 <- renderUI({
+  output$modelMeasure<- renderUI({
     inFile <- input$file1 
     
     if(is.null(inFile)){
@@ -149,13 +198,7 @@ server <- function(input, output, session) {
     actionButton("action","Generate Model", icon("grain", lib = "glyphicon"))
   })
 
-  # EVs receiver
-  output$evReceiver <- renderUI({
-
-    
-
-  })
-
+ 
 
   # Temporal sample model image
   output$model <- renderPlot({

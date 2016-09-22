@@ -20,8 +20,8 @@ vars <- c(
 
 ui <- fluidPage(navbarPage(title = p(style =" font-family:Impact","Linear Regression"),
                            
-  # model generator 
-                           
+  # model generator.  
+
   tabPanel(title = "Model generator",
        
       sidebarLayout(
@@ -36,29 +36,28 @@ ui <- fluidPage(navbarPage(title = p(style =" font-family:Impact","Linear Regres
             ),
             wellPanel(style ="background-color:white",
               h4(p(style ="font-family:Impact","Value Selector")),
-              uiOutput("modelPage"),
-              uiOutput("modelPage2"),
+              uiOutput("dvSelector"),
+              uiOutput("evChoice"),
               conditionalPanel(
                   condition = "input.exvaris == 'select'",
-                  uiOutput("modelPage3"))
+                  uiOutput("evSelector"))
               ,
-              uiOutput("modelPage4"),
-              br(),br(),
-              h4(p(style ="font-family:Impact","Data Types")),
-              uiOutput("modelPage5"),
               br(),
-              h4(p(style ="font-family:Impact","Model logs")),
+              h4(p(style ="font-family:Impact","Data Types")),
+              uiOutput("dataType"),
+              br(),
+              h4(p(style ="font-family:Impact","Model Logs")),
               br()
             )
           ),
           mainPanel(
               h4(p(style ="font-family:Impact","Model Visualization")),
-              uiOutput("modelPage6"),br(),
-              textInput("tunnedModel", "Tunning Model", "Model"),
+              uiOutput("modelVis"),br(),
+              uiOutput("tunningBox"),
               uiOutput("generateButton"),
               br(),
               h4(p(style ="font-family:Impact","Model Accuracy")),
-              uiOutput("modelPage7")
+              uiOutput("modelMeasure")
           )
           
         )                            
