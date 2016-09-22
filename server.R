@@ -153,7 +153,8 @@ server <- function(input, output, session) {
           evs <<- setdiff(except_factors, selectedDv()) 
 
       else if(evMethod() == "select")
-          evs <<- selectedEvs
+          evs <<- selectedEvs()
+          
 
       i <- 1
       while( i <= length(evs)){
