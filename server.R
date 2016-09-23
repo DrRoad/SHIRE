@@ -4,7 +4,6 @@ plots <- c(
   "Scatter" = "scatter"
 )
 
-
 insurance <- read.csv("insurance.csv")
 
 data <- data.frame()
@@ -82,20 +81,21 @@ server <- function(input, output, session) {
   #EVs Selector  
   output$evSelector <- renderUI({
 
-    checkboxGroupInput("evSelected","Select EVs", setdiff(vars, input$dfvari))
-
-  })
-
-  #Submit EVs button
-  output$evButton <- renderUI({
-
-    inFile <- input$file1 
+  	wellPanel(
+  		checkboxGroupInput("evSelected","Select EVs", setdiff(vars, input$dfvari)),
+  		actionButton("addVariBox","Add New variable", icon("apple", lib = "glyphicon"))
+	)
     
-    if(is.null(inFile))
-      return(NULL)
-      
-    actionButton("submit","Submit EVs", icon("apple", lib = "glyphicon"))
   })
+
+
+  # if addVariable button is clicked, show the textbox.
+  output$addVariable <- renderUI({
+
+    actionButton("addVariBox","Add New variable", icon("apple", lib = "glyphicon"))
+
+  })
+
 
   #check the data 
   output$dataType <- renderUI({
@@ -112,6 +112,12 @@ server <- function(input, output, session) {
       verbatimTextOutput("str")
     }
   })
+
+  output$addBox <- renderUI({
+  		textInput("", "Tunning Model", tempModel,width = '500px')
+	
+  	})
+  
 
   #model visualization
   output$modelVis <- renderUI({
@@ -131,6 +137,46 @@ server <- function(input, output, session) {
     }
   })
 
+  # tunning vari 
+  output$tunningVari <- renderUI({
+
+  if(input$addVariBox){
+  		
+	  	wellPanel(
+
+	  		textInput("newMemName", "New Column Name", placeholder = "ex) age"),
+	  		textInput("newMemDes", "Description",placeholder = "ex) data$age^2"),
+	  		actionButton("insertVariBox","Insert", icon("hand-up", lib = "glyphicon"))," ", 
+	  		actionButton("closeBox","Close", icon("eye-close", lib = "glyphicon"))
+		)
+	}
+	
+  })
+
+
+  # New Column Section 
+  
+  newName <<- reactive(input$newMemName)
+  newDes <<- reactive(input$newMemDes)
+
+  observeEvent(input$addVariBox, {
+  	insertUI(
+  		selector = "#evSelector",
+  		where = "afterEnd",
+  		ui = uiOutput("tunningVari")
+  	)
+  })
+  observeEvent(input$closeBox, {
+
+  	removeUI(
+  		selector = "#tunningVari")
+
+  })
+
+  
+
+
+   
   # tunning model textbox 
   output$tunningBox <- renderUI({
     inFile <- input$file1 

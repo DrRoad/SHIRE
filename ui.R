@@ -40,14 +40,11 @@ ui <- fluidPage(navbarPage(title = p(style =" font-family:Impact","Linear Regres
               uiOutput("evChoice"),
               conditionalPanel(
                   condition = "input.exvaris == 'select'",
-                  uiOutput("evSelector"))
-              ,
+                  uiOutput("evSelector")
+              ),
               br(),
               h4(p(style ="font-family:Impact","Data Types")),
-              uiOutput("dataType"),
-              br(),
-              h4(p(style ="font-family:Impact","Model Logs")),
-              br()
+              uiOutput("dataType")
             )
           ),
           mainPanel(
@@ -57,7 +54,9 @@ ui <- fluidPage(navbarPage(title = p(style =" font-family:Impact","Linear Regres
               uiOutput("generateButton"),
               br(),
               h4(p(style ="font-family:Impact","Model Accuracy")),
-              uiOutput("modelMeasure")
+              uiOutput("modelMeasure"),br(),
+              h4(p(style ="font-family:Impact","Model Logs"))
+              
           )
           
         )                            
