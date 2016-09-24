@@ -1,3 +1,4 @@
+library(shiny)
 plots <- c(
   "Histogram" = "hist",
   "Boxplot" = "boxplot",
@@ -65,7 +66,6 @@ server <- function(input, output, session) {
   })
   
 
-
   #EV Method choices
   output$evChoice <- renderUI({
     inFile <- input$file1 
@@ -113,10 +113,7 @@ server <- function(input, output, session) {
     }
   })
 
-  output$addBox <- renderUI({
-  		textInput("", "Tunning Model", tempModel,width = '500px')
-	
-  	})
+
   
 
   #model visualization
@@ -144,7 +141,7 @@ server <- function(input, output, session) {
   		
 	  	wellPanel(
 
-	  		textInput("newMemName", "New Column Name", placeholder = "ex) age"),
+	  		textInput("newMemName", "New Column Name", placeholder = "ex) age2"),
 	  		textInput("newMemDes", "Description",placeholder = "ex) data$age^2"),
 	  		actionButton("insertVariBox","Insert", icon("hand-up", lib = "glyphicon"))," ", 
 	  		actionButton("closeBox","Close", icon("eye-close", lib = "glyphicon"))
@@ -170,10 +167,14 @@ server <- function(input, output, session) {
 
   	removeUI(
   		selector = "#tunningVari")
+  })
+  observeEvent(input$insertVariBox, {
+
+    # command <- paste("data$"newName(),)
 
   })
 
-  
+
 
 
    

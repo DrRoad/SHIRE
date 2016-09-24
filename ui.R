@@ -1,5 +1,6 @@
 ## app.R ##
 library(shiny)
+library(shinythemes)
 
 # Choices for drop-downs
 plots <- c(
@@ -18,7 +19,7 @@ vars <- c(
 
 
 
-ui <- fluidPage(navbarPage(title = p(style =" font-family:Impact","Linear Regression"),
+ui <- fluidPage(theme = shinytheme("flatly"),navbarPage(title = p(style =" font-family:Impact","Linear Regression"),
                            
   # model generator.  
 
@@ -35,27 +36,28 @@ ui <- fluidPage(navbarPage(title = p(style =" font-family:Impact","Linear Regres
               checkboxInput("header", "Header", TRUE)
             ),
             wellPanel(style ="background-color:white",
-              h4(p(style ="font-family:Impact","Value Selector")),
+              h4(strong("Value Selector")),
               uiOutput("dvSelector"),
               uiOutput("evChoice"),
               conditionalPanel(
                   condition = "input.exvaris == 'select'",
                   uiOutput("evSelector")
               ),
+             
               br(),
-              h4(p(style ="font-family:Impact","Data Types")),
+              h4(strong("Data Types")),
               uiOutput("dataType")
             )
           ),
           mainPanel(
-              h4(p(style ="font-family:Impact","Model Visualization")),
+              h4(strong("Model Visualization")),
               uiOutput("modelVis"),br(),
               uiOutput("tunningBox"),
               uiOutput("generateButton"),
               br(),
-              h4(p(style ="font-family:Impact","Model Accuracy")),
+              h4(strong("Model Accuracy")),
               uiOutput("modelMeasure"),br(),
-              h4(p(style ="font-family:Impact","Model Logs"))
+              h4(strong("Model Logs"))
               
           )
           
