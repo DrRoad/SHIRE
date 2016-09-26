@@ -52,6 +52,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),navbarPage(title = p(style =" font-
           mainPanel(
               h4(strong("Model Visualization")),
               uiOutput("modelVis"),br(),
+              verbatimTextOutput("test"),
               uiOutput("tunningBox"),
               uiOutput("generateButton"),
               br(),

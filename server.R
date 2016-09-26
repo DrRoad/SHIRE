@@ -7,22 +7,22 @@ plots <- c(
 
 insurance <- read.csv("insurance.csv")
 
-data <- data.frame()
-vars <- c()
+
 
 
 server <- function(input, output, session) {
   
   ######################################################
   ### From here, Model generator
-
-  
+  data <<- data.frame()
+  vars <- c()
+  reacVars <- eventReactive(input$insertVariBox,{})
   #어떤 형식의 ev인지 선택
   evMethod <<- reactive(input$exvaris)
   #checkboxGroup에서 받아온 evs.
   selectedEvs <<- reactive(input$evSelected)
   selectedDv <<- reactive(input$dfvari)
-
+ 
 
   #DV Selector
   output$dvSelector <- renderUI({
@@ -39,15 +39,12 @@ server <- function(input, output, session) {
       data <<- read.csv(inFile$datapath, header = input$header)  
       #var setting.
       vars <<- colnames(data)
+      
+    
       #except_factors
-      except_factors <<- colnames(data)
-
-      output$str <- renderPrint({
-        if(!is.null(data)){str(data)}
-      })
+      except_factors <<- colnames(data) 
 
       i <- 1
-      
       while( i <= length(vars)){
           if(is.factor(data[,vars[i]])){
             except_factors <<- setdiff(except_factors, vars[i])
@@ -64,7 +61,6 @@ server <- function(input, output, session) {
     }
 
   })
-  
 
   #EV Method choices
   output$evChoice <- renderUI({
@@ -81,17 +77,17 @@ server <- function(input, output, session) {
   #EVs Selector  
   output$evSelector <- renderUI({
 
-  	wellPanel(
-  		checkboxGroupInput("evSelected","Select EVs", setdiff(vars, input$dfvari)),
+    wellPanel(
+  		checkboxGroupInput("evSelected","Select EVs", setdiff(vars, selectedDv())),
   		actionButton("addVariBox","Add New variable", icon("apple", lib = "glyphicon"))
-	)
+	  )
     
   })
 
 
   # if addVariable button is clicked, show the textbox.
   output$addVariable <- renderUI({
-
+    
     actionButton("addVariBox","Add New variable", icon("apple", lib = "glyphicon"))
 
   })
@@ -109,11 +105,12 @@ server <- function(input, output, session) {
       verbatimTextOutput("noData2")
     }
     else{
+      output$str <- renderPrint({
+        if(!is.null(data)){str(data)}
+      })
       verbatimTextOutput("str")
     }
   })
-
-
   
 
   #model visualization
@@ -134,29 +131,32 @@ server <- function(input, output, session) {
     }
   })
 
+
   # tunning vari 
   output$tunningVari <- renderUI({
 
-  if(input$addVariBox){
-  		
-	  	wellPanel(
+    if(input$addVariBox){
+    		
+  	  	wellPanel(
 
-	  		textInput("newMemName", "New Column Name", placeholder = "ex) age2"),
-	  		textInput("newMemDes", "Description",placeholder = "ex) data$age^2"),
-	  		actionButton("insertVariBox","Insert", icon("hand-up", lib = "glyphicon"))," ", 
-	  		actionButton("closeBox","Close", icon("eye-close", lib = "glyphicon"))
-		)
-	}
+  	  		textInput("newMemName", "New Column Name", placeholder = "ex) age2"),
+  	  		textInput("newMemDes", "Description",placeholder = "ex) data$age^2"),
+  	  		actionButton("insertVariBox","Insert", icon("hand-up", lib = "glyphicon"))," ", 
+  	  		actionButton("closeBox","Close", icon("eye-close", lib = "glyphicon"))
+  		  )
+  	}
 	
   })
 
 
-  # New Column Section 
+  # New Column Section ############################################
   
   newName <<- reactive(input$newMemName)
   newDes <<- reactive(input$newMemDes)
 
+
   observeEvent(input$addVariBox, {
+    
   	insertUI(
   		selector = "#evSelector",
   		where = "afterEnd",
@@ -164,20 +164,30 @@ server <- function(input, output, session) {
   	)
   })
   observeEvent(input$closeBox, {
-
   	removeUI(
   		selector = "#tunningVari")
   })
   observeEvent(input$insertVariBox, {
+    
+    if(newName()!="")
+      vars <<- union(vars, newName())
 
-    # command <- paste("data$"newName(),)
-
+    output$test <- renderPrint({
+              print(vars)
+    })
   })
 
+  
+        
+  
+# newMemName을 Var에 넣는건, actionButton을 눌렀을 때, 추가 할 수 있도록, 
+# observeEvent()로 따로 처리하자. 
+  
 
 
 
-   
+
+ ################################################################  
   # tunning model textbox 
   output$tunningBox <- renderUI({
     inFile <- input$file1 
@@ -252,9 +262,6 @@ server <- function(input, output, session) {
   output$model <- renderPlot({
       if(input$action){hist(insurance$charges)}
   })
-
-
-  output$value <- renderText({ input$tunnedModel })
 
 
 
