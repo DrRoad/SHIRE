@@ -58,7 +58,8 @@ ui <- fluidPage(theme = shinytheme("flatly"),navbarPage(title = p(style =" font-
               br(),
               h4(strong("Model Accuracy")),
               uiOutput("modelMeasure"),br(),
-              h4(strong("Model Logs"))
+              h4(strong("Model Logs")),
+              uiOutput("logs")
               
           )
           

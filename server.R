@@ -16,16 +16,23 @@ server <- function(input, output, session) {
   ### From here, Model generator
   data <<- data.frame()
   vars <- c()
+  commandLogs <<- c()
+  model <<- ""
+  tempModel <<- ""
+  modelResult<<- list()
+
+
   reacVars <- eventReactive(input$insertVariBox,{})
   #어떤 형식의 ev인지 선택
   evMethod <<- reactive(input$exvaris)
   #checkboxGroup에서 받아온 evs.
-  selectedEvs <<- reactive(input$evSelected)
+  selectedEvs <<- reactive(input$evSelected) 
   selectedDv <<- reactive(input$dfvari)
- 
+  modelCast <<- reactive(input$tunnedModel)
+  
 
   #DV Selector
-  output$dvSelector <- renderUI({
+output$dvSelector <- renderUI({
     inFile <- input$file1 
     
     if(is.null(inFile)){
@@ -39,7 +46,7 @@ server <- function(input, output, session) {
       data <<- read.csv(inFile$datapath, header = input$header)  
       #var setting.
       vars <<- colnames(data)
-      
+      query <<- ""
     
       #except_factors
       except_factors <<- colnames(data) 
@@ -63,7 +70,7 @@ server <- function(input, output, session) {
   })
 
   #EV Method choices
-  output$evChoice <- renderUI({
+output$evChoice <- renderUI({
     inFile <- input$file1 
     
     if(is.null(inFile))
@@ -75,7 +82,7 @@ server <- function(input, output, session) {
   })
 
   #EVs Selector  
-  output$evSelector <- renderUI({
+output$evSelector <- renderUI({
 
     wellPanel(
   		checkboxGroupInput("evSelected","Select EVs", setdiff(vars, selectedDv())),
@@ -86,7 +93,7 @@ server <- function(input, output, session) {
 
 
   # if addVariable button is clicked, show the textbox.
-  output$addVariable <- renderUI({
+output$addVariable <- renderUI({
     
     actionButton("addVariBox","Add New variable", icon("apple", lib = "glyphicon"))
 
@@ -94,7 +101,7 @@ server <- function(input, output, session) {
 
 
   #check the data 
-  output$dataType <- renderUI({
+output$dataType <- renderUI({
 
     inFile <- input$file1 
     
@@ -114,7 +121,7 @@ server <- function(input, output, session) {
   
 
   #model visualization
-  output$modelVis <- renderUI({
+output$modelVis <- renderUI({
     inFile <- input$file1 
     
     if(is.null(inFile)){
@@ -133,7 +140,7 @@ server <- function(input, output, session) {
 
 
   # tunning vari 
-  output$tunningVari <- renderUI({
+output$tunningVari <- renderUI({
 
     if(input$addVariBox){
     		
@@ -149,15 +156,15 @@ server <- function(input, output, session) {
   })
 
 
-  # New Column Section ############################################
-  
+#New Column Section ############################################
+#튜닝변수 설정.
   newName <<- reactive(input$newMemName)
   newDes <<- reactive(input$newMemDes)
 
 
-  observeEvent(input$addVariBox, {
+observeEvent(input$addVariBox, {
     
-  	insertUI(
+  insertUI(
   		selector = "#evSelector",
   		where = "afterEnd",
   		ui = uiOutput("tunningVari")
@@ -167,41 +174,48 @@ server <- function(input, output, session) {
   	removeUI(
   		selector = "#tunningVari")
   })
-  observeEvent(input$insertVariBox, {
+#튜닝변수 추가.
+observeEvent(input$insertVariBox, {
     
-    if(newName()!="")
+    if(newName()!="" && newDes()!=""){
       vars <<- union(vars, newName())
 
+      query <<- paste("data$", newName(), "<<-", newDes())
+      query <<- gsub(" ","", query)
+      eval(parse(text=query))    
+    }
+
+
+    updateCheckboxGroupInput(session, "evSelected",
+      label = "Select EVs",
+      choices = setdiff(vars, selectedDv()),
+      selected = input$evSelected
+    )
+   
     output$test <- renderPrint({
-              print(vars)
+      print(head(data))
     })
+    
   })
 
-  
-        
-  
-# newMemName을 Var에 넣는건, actionButton을 눌렀을 때, 추가 할 수 있도록, 
-# observeEvent()로 따로 처리하자. 
+ 
   
 
 
-
-
- ################################################################  
-  # tunning model textbox 
-  output$tunningBox <- renderUI({
+################################################################  
+# tunning model textbox 
+output$tunningBox <- renderUI({
     inFile <- input$file1 
     
     if(is.null(inFile)){
       return (NULL)
     }
 
-
     else{
 
-      model = "lm("
+      tempModel <<- "lm("
 
-      model = paste(model, selectedDv(), "~") 
+      tempModel <<- paste(tempModel, selectedDv(), "~") 
     
       if(evMethod() == "all")
           evs <<- "."
@@ -216,38 +230,38 @@ server <- function(input, output, session) {
       i <- 1
       while( i <= length(evs)){
         if(i==1)
-          model = paste(model, evs[i])  
+          tempModel <<- paste(tempModel, evs[i])  
         else
-          model = paste(model, "+",evs[i])
+          tempModel <<- paste(tempModel, "+",evs[i])
         i<- i+1   
       }
-      tempModel = paste(model,")")
+      tempModel <<- paste(tempModel, ", data)")
 
-      textInput("tunnedModel", "Tunning Model", tempModel,width = '500px')
+      textInput("tunnedModel", "Tunning Model", tempModel ,width = '500px')
     }
   })
 
 
-  #model accuracy
-  output$modelMeasure<- renderUI({
-    inFile <- input$file1 
+  #model accuracy & visualizing
+output$modelMeasure <- renderUI({
+    #put the result into modelResult
+    if(input$action){
+
+        model <<- modelCast()
+        query <<- paste("modelResult", "=", model)
+        eval(parse(text=query))  
+    }
+
+    output$modelAcc <- renderPrint({
+        # print(query)
+        summary(modelResult)
+    })
+    verbatimTextOutput("modelAcc")
     
-    if(is.null(inFile)){
-      output$noData4 <- renderText({
-        "Generate Model, please."
-      })
-      verbatimTextOutput("noData4")
-    }
-    else{
-      output$modelAcc <- renderPrint({
-        summary(data)
-      })
-      verbatimTextOutput("modelAcc")
-    }
   })
 
   #model generator button
-  output$generateButton <- renderUI({
+output$generateButton <- renderUI({
     inFile <- input$file1 
     
     if(is.null(inFile))
@@ -258,19 +272,37 @@ server <- function(input, output, session) {
 
  
 
-  # Temporal sample model image
+# Temporal sample model image
   output$model <- renderPlot({
       if(input$action){hist(insurance$charges)}
   })
 
 
+#log UI
+output$logs <- renderUI({
+     inFile <- input$file1 
+    
+    if(is.null(inFile)){
+      output$noLog <- renderText({
+        "No Logs"
+      })
+      verbatimTextOutput("noLog")
+    }
+    else{
+       if(input$action){
+        commandLogs <<- union(commandLogs, modelCast())        
+        output$modelog <- renderText({
+            print(commandLogs)
+        })
+        verbatimTextOutput("modelog")
+       }
+    }
+})
 
 
 
 
-
-  #######################################################
-  ###From here, Data Explorer
+####################################################### From here, Data Explorer
  
   output$dataPage <- renderUI({
     
