@@ -193,7 +193,7 @@ observeEvent(input$insertVariBox, {
     )
    
     output$test <- renderPrint({
-      print(head(data))
+      print(head(data,3))
     })
     
   })
@@ -247,16 +247,18 @@ output$modelMeasure <- renderUI({
     #put the result into modelResult
     if(input$action){
 
-        model <<- modelCast()
+        model <<- isolate(modelCast())
         query <<- paste("modelResult", "=", model)
         eval(parse(text=query))  
-    }
 
-    output$modelAcc <- renderPrint({
+        output$modelAcc <- renderPrint({
         # print(query)
         summary(modelResult)
-    })
-    verbatimTextOutput("modelAcc")
+        })
+        verbatimTextOutput("modelAcc")
+    }
+
+    
     
   })
 
@@ -279,7 +281,7 @@ output$generateButton <- renderUI({
 
 
 #log UI
-output$logs <- renderUI({
+   output$logs <- renderUI({
      inFile <- input$file1 
     
     if(is.null(inFile)){
@@ -290,14 +292,14 @@ output$logs <- renderUI({
     }
     else{
        if(input$action){
-        commandLogs <<- union(commandLogs, modelCast())        
+        commandLogs <<- union(commandLogs, isolate(modelCast()))        
         output$modelog <- renderText({
             print(commandLogs)
         })
         verbatimTextOutput("modelog")
        }
     }
-})
+  })
 
 
 
