@@ -58,9 +58,15 @@ ui <- fluidPage(theme = shinytheme("flatly"),navbarPage(title = p(style =" font-
               br(),
               h4(strong("Model Accuracy")),
               uiOutput("modelMeasure"),br(),
-              h4(strong("Model Logs")),
-              uiOutput("logs")
               
+              fluidRow(
+                column(6,h4(strong("Model Logs"))),
+                column(6,h5(strong("p-value $ Adjusted R squared")))
+              ),
+              fluidRow(
+                column(6,uiOutput("logs")),
+                column(6,uiOutput("modelEval"))      
+              )
           )
           
         )                            

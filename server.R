@@ -17,10 +17,15 @@ server <- function(input, output, session) {
   data <<- data.frame()
   vars <- c()
   commandLogs <<- c()
+  evalLogs <<- c()
   model <<- ""
   tempModel <<- ""
   modelResult<<- list()
-
+  modelCount <<- 1
+  modelCount2 <<- 1
+  r.square <<- c()
+  p.value <<- c()
+ 
 
   reacVars <- eventReactive(input$insertVariBox,{})
   #어떤 형식의 ev인지 선택
@@ -244,21 +249,30 @@ output$tunningBox <- renderUI({
 
   #model accuracy & visualizing
 output$modelMeasure <- renderUI({
-    #put the result into modelResult
-    if(input$action){
-
-        model <<- isolate(modelCast())
-        query <<- paste("modelResult", "=", model)
-        eval(parse(text=query))  
-
-        output$modelAcc <- renderPrint({
-        # print(query)
-        summary(modelResult)
-        })
-        verbatimTextOutput("modelAcc")
-    }
-
+    inFile <- input$file1 
     
+    if(is.null(inFile)){
+      output$noLog1 <- renderText({
+        ""
+      })
+      verbatimTextOutput("noLog1")
+    }
+    else{
+      #put the result into modelResult
+      if(input$action){
+
+          model <<- isolate(modelCast())
+          query <<- paste("modelResult", "<<-", model)
+          eval(parse(text=query))  
+
+          output$modelAcc <- renderPrint({
+          # print(query)
+          summary(modelResult)
+          })
+          verbatimTextOutput("modelAcc")
+      }
+    }
+      
     
   })
 
@@ -281,25 +295,68 @@ output$generateButton <- renderUI({
 
 
 #log UI
-   output$logs <- renderUI({
+  output$logs <- renderUI({
      inFile <- input$file1 
     
     if(is.null(inFile)){
-      output$noLog <- renderText({
-        "No Logs"
+      output$noLog1 <- renderText({
+        ""
       })
-      verbatimTextOutput("noLog")
+      verbatimTextOutput("noLog1")
     }
     else{
+      
        if(input$action){
-        commandLogs <<- union(commandLogs, isolate(modelCast()))        
-        output$modelog <- renderText({
+        newModel <- isolate(modelCast())
+        
+        if(modelCount == 1)
+          newlog <- paste('------------------------------------------------------------------\n',gsub(" ","",paste(modelCount,'.')),newModel)
+        else        
+          newlog <- paste(gsub(" ","",paste(modelCount,'.')),newModel)
+        
+        commandLogs <<- union(commandLogs, paste(newlog,'\n'))   
+        modelCount <<- modelCount + 1
+        
+        output$modelLogs <- renderText({
             print(commandLogs)
         })
-        verbatimTextOutput("modelog")
+        verbatimTextOutput("modelLogs")
+        
        }
     }
   })
+
+#modelEvaluation
+  output$modelEval <- renderUI({
+     inFile <- input$file1 
+    
+    if(is.null(inFile)){
+      output$noLog2 <- renderText({
+        ""
+      })
+      verbatimTextOutput("noLog2")
+    }
+    else{
+          if(input$action){
+            new.r.square <- round(summary(modelResult)$adj.r.squared, digits=7)
+            new.p.value  <- round(summary(modelResult)$coefficients[1,4], digits=7)
+
+            if(modelCount2 == 1)
+              newlog <- paste('------------------------------------------------------------------\n',gsub(" ","",paste(modelCount2,'.')),new.p.value,'|', new.r.square)
+            else        
+              newlog <- paste(gsub(" ","",paste(modelCount2,'.')),new.p.value,'|', new.r.square)
+            
+            evalLogs <<- union(evalLogs, paste(newlog,'\n'))   
+            modelCount2 <<- modelCount2 + 1
+            
+            output$modelLogs2 <- renderText({
+                print(evalLogs)
+            })
+            verbatimTextOutput("modelLogs2")
+          
+         }
+       }
+})
 
 
 
