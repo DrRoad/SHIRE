@@ -308,7 +308,11 @@ output$generateButton <- renderUI({
 
 # Temporal sample model image
   output$model <- renderPlot({
-      if(input$action){hist(insurance$charges)}
+      if(input$action){
+        
+        plot(modelResult, 1)
+
+      }
   })
 
 
