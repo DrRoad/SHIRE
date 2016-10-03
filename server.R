@@ -12,8 +12,8 @@ insurance <- read.csv("insurance.csv")
 
 server <- function(input, output, session) {
   
-  ######################################################
-  ### From here, Model generator
+######################################################
+### From here, Model generator
   data <<- data.frame()
   vars <- c()
   commandLogs <<- c()
@@ -25,6 +25,9 @@ server <- function(input, output, session) {
   modelCount2 <<- 1
   r.square <<- c()
   p.value <<- c()
+  except_factors <<- c()
+  factors <<- c()
+
  
 
   reacVars <- eventReactive(input$insertVariBox,{})
@@ -34,7 +37,19 @@ server <- function(input, output, session) {
   selectedEvs <<- reactive(input$evSelected) 
   selectedDv <<- reactive(input$dfvari)
   modelCast <<- reactive(input$tunnedModel)
-  
+  plotSelected <<- reactive(input$plotType)
+  variSelected <<- reactive(input$variable)
+  factorSelected <<- reactive(input$factorSelector)
+
+  summaryQuery <<- reactive({
+    paste(gsub(' ','',paste('summary(data$', variSelected(),')')))
+  })
+  boxplotQuery <<- reactive({
+    paste(gsub(' ','',paste('boxplot(data$', variSelected())),',main="', paste("Boxplot of", variSelected()),'",notch= TRUE',')')
+  })
+  histQuery <<- reactive({
+    paste(gsub(' ', '',paste('hist(data$',variSelected())),',main ="', paste("Histogram of",variSelected()),'")')
+  })
 
   #DV Selector
 output$dvSelector <- renderUI({
@@ -55,15 +70,19 @@ output$dvSelector <- renderUI({
     
       #except_factors
       except_factors <<- colnames(data) 
+      factors <<- c()
 
       i <- 1
       while( i <= length(vars)){
           if(is.factor(data[,vars[i]])){
             except_factors <<- setdiff(except_factors, vars[i])
+            factors <<- union(factors, vars[i])
           }
           i<- i+1   
       }
- 
+      output$dataTable <- renderDataTable(
+        data, options = list(pageLength = 5)
+      )
       #  A defendent variable    
       selectInput("dfvari", 
            label = "DV(Defendent variable)", 
@@ -117,10 +136,11 @@ output$dataType <- renderUI({
       verbatimTextOutput("noData2")
     }
     else{
-      output$str <- renderPrint({
-        if(!is.null(data)){str(data)}
-      })
-      verbatimTextOutput("str")
+
+       output$str <- renderPrint({
+          if(!is.null(data)){str(data)}
+        })
+        verbatimTextOutput("str")
     }
   })
   
@@ -161,7 +181,7 @@ output$tunningVari <- renderUI({
   })
 
 
-#New Column Section ############################################
+#New Column Section ###
 #튜닝변수 설정.
   newName <<- reactive(input$newMemName)
   newDes <<- reactive(input$newMemDes)
@@ -196,18 +216,16 @@ observeEvent(input$insertVariBox, {
       choices = setdiff(vars, selectedDv()),
       selected = input$evSelected
     )
-   
-    output$test <- renderPrint({
-      print(head(data,3))
+  
+    output$str <- renderPrint({
+        str(data)
     })
-    
   })
 
  
   
 
 
-################################################################  
 # tunning model textbox 
 output$tunningBox <- renderUI({
     inFile <- input$file1 
@@ -276,7 +294,7 @@ output$modelMeasure <- renderUI({
     
   })
 
-  #model generator button
+#model generator button
 output$generateButton <- renderUI({
     inFile <- input$file1 
     
@@ -338,8 +356,8 @@ output$generateButton <- renderUI({
     }
     else{
           if(input$action){
-            new.r.square <- round(summary(modelResult)$adj.r.squared, digits=7)
-            new.p.value  <- round(summary(modelResult)$coefficients[1,4], digits=7)
+            new.r.square <- round(summary(modelResult)$adj.r.squared, digits=3)
+            new.p.value  <- round(summary(modelResult)$coefficients[1,4], digits=10)
 
             if(modelCount2 == 1)
               newlog <- paste('------------------------------------------------------------------\n',gsub(" ","",paste(modelCount2,'.')),new.p.value,'|', new.r.square)
@@ -362,70 +380,87 @@ output$generateButton <- renderUI({
 
 
 ####################################################### From here, Data Explorer
- 
-  output$dataPage <- renderUI({
-    
+  output$plotType <- renderUI({
+     inFile <- input$file1
+      
+       if(is.null(inFile))
+          return(NULL)
+       else{
+        selectInput("plotType", "Plot Type", plots,selected = "boxplot")
+       }
+  })
+
+
+  output$variInput <- renderUI({
       inFile <- input$file1
       
       if(is.null(inFile))
         return(NULL)
-    
-      plot <- reactive(input$plotType)
-      vari <- reactive(input$variable)
-      
-      # histogram  
-      output$plot <- renderPlot({
-        
-        if(plot() == "hist"){
-          switch(vari(),
-                 charges = hist(insurance$charges, main = paste("Histogram of",vari())),
-                 age = hist(insurance$age, main = paste("Histogram of",vari())),
-                 bmi = hist(insurance$bmi, main = paste("Histogram of",vari())),
-                 children = hist(insurance$children, main = paste("Histogram of",vari()))
-          )
-        }
-        else if(plot() == "scatter"){
-          pairs(insurance[c("age","bmi", "children", "charges")], pch= c(1,2,3), main="Scatter plots")
-          
-        }
-        else if(plot() == "boxplot"){
-          switch(vari(),
-                 charges = boxplot(insurance$charges, main = paste("Boxplot of",vari()), notch =TRUE),
-                 age = boxplot(insurance$age, main = paste("Boxplot of",vari()), notch =TRUE),
-                 bmi = boxplot(insurance$bmi, main = paste("Boxplot of",vari()), notch =TRUE),
-                 children = boxplot(insurance$children, main = paste("Boxplot of",vari()), notch =TRUE)
-          )
-        }
-      })
-      
-      #various informations
-      output$summary <- renderPrint({
-        if(vari() == "age") 
-          summary(insurance$age)
-        
-        else if(vari() == "charges")
-          summary(insurance$charges)
-        
-        else if(vari() == "bmi")
-          summary(insurance$bmi)
-        
-        else if(vari() == "children")
-          summary(insurance$children)
-      })
-      
-      output$table <- renderPrint({
-        table(insurance$region)
-      })
-      
-      output$col <- renderPrint({
-        cor(insurance[c("age", "bmi", "children", "charges")])
-      })
-      
-      #data table
-      output$dataTable <- renderDataTable(
-        insurance, options = list(pageLength = 5)
-      )
-    
+      else{
+
+        selectInput("variable", "Variables", except_factors)
+      }
   })
-  
+
+ 
+  output$dataPage <- renderUI({
+      inFile <- input$file1
+      
+      if(is.null(inFile))
+        return(NULL)
+      else{
+        
+        #various informations
+        output$summary <- renderPrint({
+            eval(parse(text=summaryQuery()))
+        })
+
+        output$plot <- renderPlot({ 
+          if(plotSelected() == "hist"){
+                 eval(parse(text=histQuery()))
+            }
+          else if(plotSelected() == "scatter"){
+            pairs(data[except_factors], main="Scatter plots")
+          }
+          else if(plotSelected() == "boxplot"){
+                eval(parse(text=boxplotQuery()))
+          }
+        })
+      }
+  })
+
+  output$tables <- renderUI({
+    inFile <- input$file1
+      
+    if(is.null(inFile))
+      return(NULL)
+
+    selected <- factorSelected()
+      
+    output$table <- renderPrint({
+      table(data[selected])
+    })
+    verbatimTextOutput("table")
+  })
+
+  output$factorInput <- renderUI({
+
+     inFile <- input$file1
+      
+      if(is.null(inFile))
+        return(NULL)
+      else{
+        selectInput("factorSelector", "Factor variables", factors)
+      }
+  })
+
+  output$cor <- renderPrint({
+    inFile <- input$file1
+      
+    if(is.null(inFile))
+      return(NULL)
+
+    cor(data[except_factors])
+  })
+
 }

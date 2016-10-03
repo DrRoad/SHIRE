@@ -9,17 +9,13 @@ plots <- c(
   "Scatter" = "scatter"
 )
 
-
-vars <- c(
-  "charges" = "charges",
-  "age" = "age",
-  "BMI" = "bmi",
-  "children" = "children"
-)
-
-
-
-ui <- fluidPage(theme = shinytheme("flatly"),navbarPage(title = p(style =" font-family:Impact","Linear Regression"),
+ui <- fluidPage(
+  tags$head(
+    tags$style(HTML("
+     .shiny-output-error { visibility: hidden; } 
+     .shiny-output-error:before { visibility: hidden; }
+  "))
+),theme = shinytheme("flatly"),navbarPage(title = p(style =" font-family:Impact","Linear Regression"),
                            
   # model generator.  
 
@@ -42,8 +38,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),navbarPage(title = p(style =" font-
               conditionalPanel(
                   condition = "input.exvaris == 'select'",
                   uiOutput("evSelector")
-              ),
-             
+              ),           
               br(),
               h4(strong("Data Types")),
               uiOutput("dataType")
@@ -52,21 +47,19 @@ ui <- fluidPage(theme = shinytheme("flatly"),navbarPage(title = p(style =" font-
           mainPanel(
               h4(strong("Model Visualization")),
               uiOutput("modelVis"),br(),
-              verbatimTextOutput("test"),
               uiOutput("tunningBox"),
               uiOutput("generateButton"),
               br(),
-              h4(strong("Model Accuracy")),
-              uiOutput("modelMeasure"),br(),
-              
               fluidRow(
                 column(6,h4(strong("Model Logs"))),
-                column(6,h5(strong("p-value $ Adjusted R squared")))
+                column(6,h5(strong("p-value & Adjusted R squared")))
               ),
               fluidRow(
                 column(6,uiOutput("logs")),
                 column(6,uiOutput("modelEval"))      
-              )
+              ),
+              h5(strong("Model information")),
+              uiOutput("modelMeasure")
           )
           
         )                            
@@ -81,16 +74,16 @@ ui <- fluidPage(theme = shinytheme("flatly"),navbarPage(title = p(style =" font-
                   uiOutput("dataPage"),
                   fluidRow(
                           column(7, 
-                                  column(5, selectInput("plotType", "Plot Type",plots)),
-                                  column(5, 
-                                         selectInput("variable", "Variables", vars)),
+                                  column(5, uiOutput("plotType")),
+                                  column(5, uiOutput("variInput")),
                                   plotOutput("plot")
                           ),
                           column(5, p(style ="font-family:Impact","Summary"),
                                              verbatimTextOutput("summary"),br(),
-                                             p(style ="font-family:Impact","Regional Data & Correlations"),
-                                             verbatimTextOutput("table"),
-                                             verbatimTextOutput("col")
+                                             p(style ="font-family:Impact","Factor Data & Correlations"),
+                                             uiOutput("factorInput"),
+                                             uiOutput("tables"),
+                                             verbatimTextOutput("cor")
                   )),br(),br(),br(),hr(),
                                     
                   fluidRow(
