@@ -1,13 +1,21 @@
+## app.R ##
+if(! "TTR"%in% installed.packages()) install.packages('TTR')
+if(! "mapproj"%in% installed.packages()) install.packages('mapproj')
+if(! "maps"%in% installed.packages()) install.packages('maps')
+if(! "quantmod"%in% installed.packages()) install.packages('quantmod')
+if(! "shinydashboard"%in% installed.packages()) install.packages('shinydashboard')
+if(! "xts"%in% installed.packages()) install.packages('xts')
+if(! "devtools"%in% installed.packages()) install.packages('devtools')
+
+
 library(shiny)
+
+
 plots <- c(
   "Histogram" = "hist",
   "Boxplot" = "boxplot",
   "Scatter" = "scatter"
 )
-
-insurance <- read.csv("insurance.csv")
-
-
 
 
 server <- function(input, output, session) {
@@ -340,7 +348,7 @@ output$generateButton <- renderUI({
         modelCount <<- modelCount + 1
         
         output$modelLogs <- renderText({
-            print(commandLogs)
+            commandLogs
         })
         verbatimTextOutput("modelLogs")
         
@@ -372,7 +380,7 @@ output$generateButton <- renderUI({
             modelCount2 <<- modelCount2 + 1
             
             output$modelLogs2 <- renderText({
-                print(evalLogs)
+                evalLogs
             })
             verbatimTextOutput("modelLogs2")
           
@@ -390,7 +398,7 @@ output$generateButton <- renderUI({
        if(is.null(inFile))
           return(NULL)
        else{
-        selectInput("plotType", "Plot Type", plots,selected = "boxplot")
+        selectInput("plotType", "Plot Type", plots,selected = "hist")
        }
   })
 

@@ -1,6 +1,19 @@
 ## app.R ##
+if(! "TTR"%in% installed.packages()) install.packages('TTR')
+if(! "mapproj"%in% installed.packages()) install.packages('mapproj')
+if(! "maps"%in% installed.packages()) install.packages('maps')
+if(! "quantmod"%in% installed.packages()) install.packages('quantmod')
+if(! "shinydashboard"%in% installed.packages()) install.packages('shinydashboard')
+if(! "xts"%in% installed.packages()) install.packages('xts')
 library(shiny)
 library(shinythemes)
+library(TTR)
+library(mapproj)
+library(maps)
+library(quantmod)
+library(shinydashboard)
+library(xts)
+
 
 # Choices for drop-downs
 plots <- c(
