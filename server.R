@@ -1,16 +1,4 @@
-## app.R ##
-if(! "TTR"%in% installed.packages()) install.packages('TTR')
-if(! "mapproj"%in% installed.packages()) install.packages('mapproj')
-if(! "maps"%in% installed.packages()) install.packages('maps')
-if(! "quantmod"%in% installed.packages()) install.packages('quantmod')
-if(! "shinydashboard"%in% installed.packages()) install.packages('shinydashboard')
-if(! "xts"%in% installed.packages()) install.packages('xts')
-if(! "devtools"%in% installed.packages()) install.packages('devtools')
-
-
 library(shiny)
-
-
 plots <- c(
   "Histogram" = "hist",
   "Boxplot" = "boxplot",
@@ -18,25 +6,24 @@ plots <- c(
 )
 
 
+
 server <- function(input, output, session) {
   
 ######################################################
 ### From here, Model generator
-  data <<- data.frame()
+  data <- data.frame()
   vars <- c()
-  commandLogs <<- c()
-  evalLogs <<- c()
-  model <<- ""
-  tempModel <<- ""
-  modelResult<<- list()
-  modelCount <<- 1
-  modelCount2 <<- 1
-  r.square <<- c()
-  p.value <<- c()
-  except_factors <<- c()
-  factors <<- c()
-
- 
+  commandLogs <- c()
+  evalLogs <- c()
+  model <- ""
+  tempModel <- ""
+  modelResult<- list()
+  modelCount <- 1
+  modelCount2 <- 1
+  r.square <- c()
+  p.value <- c()
+  except_factors <- c()
+  factors <- c()
 
   reacVars <- eventReactive(input$insertVariBox,{})
   #어떤 형식의 ev인지 선택
@@ -59,7 +46,38 @@ server <- function(input, output, session) {
     paste(gsub(' ', '',paste('hist(data$',variSelected())),',main ="', paste("Histogram of",variSelected()),'")')
   })
 
-  #DV Selector
+
+  observeEvent(input$file1,{
+    inFile <- input$file1
+
+    if(!(is.null(inFile))){
+     # data read and analyze
+        data <<- read.csv(inFile$datapath, header = input$header)  
+        #var setting.
+        vars <<- colnames(data)
+        query <<- ""
+      
+        #except_factors
+        except_factors <<- colnames(data) 
+        factors <<- c()
+
+        i <- 1
+        while( i <= length(vars)){
+            if(is.factor(data[,vars[i]])){
+              except_factors <<- setdiff(except_factors, vars[i])
+              factors <<- union(factors, vars[i])
+            }
+            i<- i+1   
+        }
+      output$dataTable <- renderDataTable(
+        data, options = list(pageLength = 5)
+      )
+      }
+
+  })
+       
+
+#DV Selector
 output$dvSelector <- renderUI({
     inFile <- input$file1 
     
@@ -70,27 +88,8 @@ output$dvSelector <- renderUI({
       verbatimTextOutput("noData")
     }
     else{
-      # data read and analyze
-      data <<- read.csv(inFile$datapath, header = input$header)  
-      #var setting.
-      vars <<- colnames(data)
-      query <<- ""
-    
-      #except_factors
-      except_factors <<- colnames(data) 
-      factors <<- c()
-
-      i <- 1
-      while( i <= length(vars)){
-          if(is.factor(data[,vars[i]])){
-            except_factors <<- setdiff(except_factors, vars[i])
-            factors <<- union(factors, vars[i])
-          }
-          i<- i+1   
-      }
-      output$dataTable <- renderDataTable(
-        data, options = list(pageLength = 5)
-      )
+      
+     
       #  A defendent variable    
       selectInput("dfvari", 
            label = "DV(Defendent variable)", 
@@ -340,7 +339,7 @@ output$generateButton <- renderUI({
         newModel <- isolate(modelCast())
         
         if(modelCount == 1)
-          newlog <- paste('------------------------------------------------------------------\n',gsub(" ","",paste(modelCount,'.')),newModel)
+          newlog <- paste('-----------------------------------------------------------------------------------\n',gsub(" ","",paste(modelCount,'.')),newModel)
         else        
           newlog <- paste(gsub(" ","",paste(modelCount,'.')),newModel)
         
@@ -372,7 +371,7 @@ output$generateButton <- renderUI({
             new.p.value  <- round(summary(modelResult)$coefficients[1,4], digits=10)
 
             if(modelCount2 == 1)
-              newlog <- paste('------------------------------------------------------------------\n',gsub(" ","",paste(modelCount2,'.')),new.p.value,'|', new.r.square)
+              newlog <- paste('------------------------------------------------------------------------------------\n',gsub(" ","",paste(modelCount2,'.')),new.p.value,'|', new.r.square)
             else        
               newlog <- paste(gsub(" ","",paste(modelCount2,'.')),new.p.value,'|', new.r.square)
             
@@ -380,7 +379,7 @@ output$generateButton <- renderUI({
             modelCount2 <<- modelCount2 + 1
             
             output$modelLogs2 <- renderText({
-                evalLogs
+               evalLogs
             })
             verbatimTextOutput("modelLogs2")
           
@@ -398,7 +397,7 @@ output$generateButton <- renderUI({
        if(is.null(inFile))
           return(NULL)
        else{
-        selectInput("plotType", "Plot Type", plots,selected = "hist")
+        selectInput("plotType", "Plot Type", plots, selected = "hist")
        }
   })
 
@@ -409,12 +408,44 @@ output$generateButton <- renderUI({
       if(is.null(inFile))
         return(NULL)
       else{
-
         selectInput("variable", "Variables", except_factors)
       }
   })
 
- 
+  output$plotAnal <- renderUI({
+    inFile <- input$file1
+      
+    if(is.null(inFile))
+      return(NULL)
+    else{
+      wellPanel(
+        style="background-color: WhiteSmoke;text-align : center; margin-top: -10px; margin-left : -15px; padding-bottom:10px",
+        plotOutput("plot"),
+        br(),br(),br(),br(),
+        strong(verbatimTextOutput("summary"))
+      )
+    }
+  })
+
+  output$factorAnal <- renderUI({
+    inFile <- input$file1
+    
+    if(is.null(inFile)){
+      return (NULL)
+    }
+    else{
+      wellPanel(
+        style = "background-color: WhiteSmoke; margin-top: -10px",
+        uiOutput("factorInput"),
+        uiOutput("tables"),
+        br(),
+        p(strong("Correlations")),
+        verbatimTextOutput("cor")
+      )
+    }
+
+  })
+
   output$dataPage <- renderUI({
       inFile <- input$file1
       
