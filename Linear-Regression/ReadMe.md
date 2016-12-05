@@ -1,6 +1,6 @@
 #Linear Regression 
 
 consists of
-- data exploer
+- data explorer
 - model generator
 
