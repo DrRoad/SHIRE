@@ -13,13 +13,6 @@ server = function(input, output,session) {
       toggle(condition = input$foo, selector = "#navbar li a[data-value=tab2]")
     })
 
-   
-    # observeEvent(input$techniques,{
-
-
-
-    # })
-
 
 
 
