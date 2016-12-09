@@ -30,16 +30,6 @@ tabPanel("Welcome", style="margin-bottom: -5px;",
             "right", options = list(container = "body"))         
       )
     )
-
-  ),
-  fluidRow(
-      column(12, 
-        tags$img(id='footer',
-          height = "35px",
-          width = "auto",
-          src = "copyright.png"
-         ) 
-      )   
   )
 )
 
