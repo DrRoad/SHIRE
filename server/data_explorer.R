@@ -1,14 +1,27 @@
 ####################################################### From here, Data Explorer
+
+output$dataName <- renderUI({
+  inFile <- input$file1
+    
+     if(is.null(inFile))
+        return(NULL)
+     else{
+        nameData <- renderText({
+          paste("Statistics of",inFile$name)
+        })
+        h3(style ="font-family:Impact; text-align: center;",nameData())
+     }
+});
+
 output$plotType <- renderUI({
    inFile <- input$file1
     
      if(is.null(inFile))
         return(NULL)
      else{
-      selectInput("plotType", "Plot Type", plots, selected = "hist")
+      selectInput("plotType", "Plot Type", plots, selected = "scatter")
      }
 })
-
 
 output$variInput <- renderUI({
     inFile <- input$file1
@@ -27,9 +40,11 @@ output$plotAnal <- renderUI({
     return(NULL)
   else{
     wellPanel(
-      style="background-color: WhiteSmoke;text-align : center; margin-top: -10px; margin-left : -15px; padding-bottom:10px",
+      style="background-color: WhiteSmoke;text-align : center;  margin-left : -15px; padding-bottom: 10px; padding-top: 10px; margin-top : 15px;",
+      column(6, uiOutput("plotType")),
+      column(6, uiOutput("variInput")),
       plotOutput("plot"),
-      br(),br(),br(),br(),
+      br(),br(),br(),br(),br(),
       strong(verbatimTextOutput("summary"))
     )
   }
@@ -43,7 +58,7 @@ output$factorAnal <- renderUI({
   }
   else{
     wellPanel(
-      style = "background-color: WhiteSmoke; margin-top: -10px",
+      style = "background-color: WhiteSmoke; margin-top : 15px; padding-top: 15px; ",
       uiOutput("factorInput"),
       uiOutput("tables"),
       br(),
@@ -54,31 +69,47 @@ output$factorAnal <- renderUI({
 
 })
 
-output$dataPage <- renderUI({
+output$rawData <- renderUI({
+
+  inFile <- input$file1
+
+  if(is.null(inFile)){
+    return (NULL)
+  }
+  else {
+    wellPanel(style = "background-color: WhiteSmoke; margin-top : 15px; margin-bottom: 15px;",dataTableOutput('dataTable'))
+  }
+
+})
+      
+#various informations
+output$summary <- renderPrint({
     inFile <- input$file1
     
     if(is.null(inFile))
       return(NULL)
-    else{
-      
-      #various informations
-      output$summary <- renderPrint({
-          eval(parse(text=summaryQuery()))
-      })
+    else
+        eval(parse(text=summaryQuery()))
+})
 
-      output$plot <- renderPlot({ 
-        if(plotSelected() == "hist"){
-               eval(parse(text=histQuery()))
-          }
-        else if(plotSelected() == "scatter"){
-          pairs(data[except_factors], main="Scatter plots")
+output$plot <- renderPlot({ 
+  inFile <- input$file1
+    
+    if(is.null(inFile))
+      return(NULL)
+    else{
+      if(plotSelected() == "hist"){
+             eval(parse(text=histQuery()))
         }
-        else if(plotSelected() == "boxplot"){
-              eval(parse(text=boxplotQuery()))
-        }
-      })
+      else if(plotSelected() == "scatter"){
+        pairs(data[except_factors], main="Scatter plots")
+      }
+      else if(plotSelected() == "boxplot"){
+            eval(parse(text=boxplotQuery()))
+      }
     }
 })
+
 
 output$tables <- renderUI({
   inFile <- input$file1
@@ -113,5 +144,4 @@ output$cor <- renderPrint({
 
   cor(data[except_factors])
 })
-session$onSessionEnded(stopApp)
 
