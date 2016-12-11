@@ -1,6 +1,7 @@
 tabPanel("Data explorer", 
   fluidRow(
-    column(11, uiOutput('dataName'))
+    column(11, uiOutput('reportTitle'),
+      uiOutput('dataName'))
   ),
   fluidRow(
         column(11,  
@@ -24,6 +25,6 @@ tabPanel("Data explorer",
         )                                               
     ),
     fluidRow( 
-       column(12, uiOutput('rawData'))
+       column(11, uiOutput('rawData'))
     )               
 )
