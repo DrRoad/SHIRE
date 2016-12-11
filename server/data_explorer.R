@@ -1,17 +1,52 @@
 ####################################################### From here, Data Explorer
 
-output$dataName <- renderUI({
+output$reportTitle <- renderUI({
   inFile <- input$file1
     
-     if(is.null(inFile))
-        return(NULL)
-     else{
-        nameData <- renderText({
-          paste("Statistics of",inFile$name)
-        })
-        h3(style ="font-family:Impact; text-align: center;",nameData())
-     }
+  if(is.null(inFile))
+    return(NULL)
+  else{
+    title <- renderText({
+      "Statistics Report"
+    })
+    h3(style ="font-family:Impact; text-align: center;",title()) 
+  }
 });
+output$dataName <- renderUI({
+  inFile <- input$file1   
+  if(is.null(inFile))
+    return(NULL)
+  else{
+    nameData <- renderText({
+      paste("of", inFile$name)
+    })
+    strong(p(style ="text-align: center;",nameData()))
+  }
+});
+output$hr <- renderUI({
+  inFile <- input$file1   
+  if(is.null(inFile))
+    return(NULL)
+  else
+    hrtext <- renderText({
+      hr()
+    })
+    p( hrtext())
+});
+
+
+output$dataName <- renderUI({
+  inFile <- input$file1   
+  if(is.null(inFile))
+    return(NULL)
+  else{
+    nameData <- renderText({
+      paste("of", inFile$name)
+    })
+    strong(p(style ="text-align: center;",nameData()))
+  }
+});
+
 
 output$plotType <- renderUI({
    inFile <- input$file1
@@ -58,7 +93,7 @@ output$factorAnal <- renderUI({
   }
   else{
     wellPanel(
-      style = "background-color: WhiteSmoke; margin-top : 15px; padding-top: 15px; ",
+      style = "background-color: WhiteSmoke; margin-top : 15px; padding-top: 15px; text-align: center;",
       uiOutput("factorInput"),
       uiOutput("tables"),
       br(),
@@ -77,7 +112,7 @@ output$rawData <- renderUI({
     return (NULL)
   }
   else {
-    wellPanel(style = "background-color: WhiteSmoke; margin-top : 15px; margin-bottom: 15px;",dataTableOutput('dataTable'))
+    wellPanel(style = "background-color: WhiteSmoke; margin-top : 15px; margin-bottom: 50px;",dataTableOutput('dataTable'))
   }
 
 })
