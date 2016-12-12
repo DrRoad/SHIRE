@@ -1,6 +1,7 @@
 ####################################################### From here, Data Explorer
 
 output$reportTitle <- renderUI({
+
   inFile <- input$file1   
   if(is.null(inFile))
     return(NULL)
@@ -11,6 +12,7 @@ output$reportTitle <- renderUI({
     h3(style ="font-family:Impact; margin-top: 75px; text-align: center;",title()) 
   }
 })
+  
 output$dataName <- renderUI({
   inFile <- input$file1   
   if(is.null(inFile))
@@ -19,6 +21,7 @@ output$dataName <- renderUI({
     nameData <- renderText({
       paste("of", inFile$name)
     })
+
     h4(style ="font-family:Times New Roman; text-align: center; margin-bottom: 10px;",nameData())
   }
 })
@@ -50,6 +53,7 @@ output$plotAnal <- renderUI({
     return(NULL)
   else{
     wellPanel(
+
       style="background-color: WhiteSmoke; text-align : center;  margin-left : -15px; padding-bottom: 10px; padding-top: 15px; margin-top : 5px; margin-bottom: 40px;",
       column(6, uiOutput("plotType")),
       column(6, uiOutput("variInput")),
@@ -68,6 +72,7 @@ output$factorAnal <- renderUI({
   }
   else{
     wellPanel(
+
       style = "background-color: WhiteSmoke; margin-top : 5px; margin-bottom: 100px; margin-left : -15px; padding-top: 15px; text-align: center;",
       uiOutput("factorInput"),
       uiOutput("tables"),

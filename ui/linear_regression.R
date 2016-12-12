@@ -1,5 +1,4 @@
 # model generator.  
-# div(id='linear',
 tabPanel(title = "Linear Regression",value ="linear",style ="padding-top: 20px; padding-bottom: 15px;",
     
     sidebarLayout(
@@ -39,5 +38,5 @@ tabPanel(title = "Linear Regression",value ="linear",style ="padding-top: 20px; 
         )
         
     )                             
-    )
-# )
+)
+

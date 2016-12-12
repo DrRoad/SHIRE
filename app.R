@@ -20,6 +20,7 @@ ui <- fluidPage( style = "background-color:white",useShinyjs(),
     tags$style(HTML("
       
 	      body {
+
 	      	  padding-top : 10px;
 	          padding-right : 15px;
 	          padding-left : 15px;
@@ -41,7 +42,6 @@ ui <- fluidPage( style = "background-color:white",useShinyjs(),
 	      }
 	      .shiny-output-error { visibility: hidden; } 
      	  .shiny-output-error:before { visibility: hidden; }
-	      .navbar { 
 	      	  padding-top : 5px;
 	          margin-bottom : -5px;
 	          margin-left : -30px;
@@ -111,6 +111,7 @@ ui <- fluidPage( style = "background-color:white",useShinyjs(),
 	      
 	  "))
     #menus > li:first-child { display: none; }
+
 
 	),theme =  shinytheme("simplex"),
   	navbarPage(title = tags$a(href="/",img(id="icon", src="icon.PNG", height= 80, width= 110)),collapsible = TRUE, id = "menus", 
