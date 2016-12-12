@@ -1,6 +1,6 @@
 # model generator.  
-
-tabPanel(title = "Linear Regression",
+# div(id='linear',
+tabPanel(title = "Linear Regression",value ="linear",style ="padding-top: 20px; padding-bottom: 15px;",
     
     sidebarLayout(
         
@@ -34,18 +34,10 @@ tabPanel(title = "Linear Regression",
               column(6,uiOutput("modelEval"))      
             ),
             h5(strong("Model information")),
-            uiOutput("modelMeasure")
+            uiOutput("modelMeasure"),
+            br()
         )
         
-    ),
-    fluidRow(
-      column(12, 
-        hr(),
-        tags$img(
-          height = "40px",
-          width = "auto",
-          align = "center",
-          src = "copyright.png") 
-      )  
-    )                                     
-)
+    )                             
+    )
+# )
