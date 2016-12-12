@@ -1,17 +1,18 @@
 ####################################################### From here, Data Explorer
 
 output$reportTitle <- renderUI({
-  inFile <- input$file1
-    
+
+  inFile <- input$file1   
   if(is.null(inFile))
     return(NULL)
   else{
     title <- renderText({
       "Statistics Report"
     })
-    h3(style ="font-family:Impact; text-align: center;",title()) 
+    h3(style ="font-family:Impact; margin-top: 75px; text-align: center;",title()) 
   }
-});
+})
+  
 output$dataName <- renderUI({
   inFile <- input$file1   
   if(is.null(inFile))
@@ -20,33 +21,10 @@ output$dataName <- renderUI({
     nameData <- renderText({
       paste("of", inFile$name)
     })
-    strong(p(style ="text-align: center;",nameData()))
+
+    h4(style ="font-family:Times New Roman; text-align: center; margin-bottom: 10px;",nameData())
   }
-});
-output$hr <- renderUI({
-  inFile <- input$file1   
-  if(is.null(inFile))
-    return(NULL)
-  else
-    hrtext <- renderText({
-      hr()
-    })
-    p( hrtext())
-});
-
-
-output$dataName <- renderUI({
-  inFile <- input$file1   
-  if(is.null(inFile))
-    return(NULL)
-  else{
-    nameData <- renderText({
-      paste("of", inFile$name)
-    })
-    strong(p(style ="text-align: center;",nameData()))
-  }
-});
-
+})
 
 output$plotType <- renderUI({
    inFile <- input$file1
@@ -54,7 +32,7 @@ output$plotType <- renderUI({
      if(is.null(inFile))
         return(NULL)
      else{
-      selectInput("plotType", "Plot Type", plots, selected = "scatter")
+      selectInput("plotType", strong("Plot Type"), plots, selected = "hist")
      }
 })
 
@@ -64,7 +42,7 @@ output$variInput <- renderUI({
     if(is.null(inFile))
       return(NULL)
     else{
-      selectInput("variable", "Variables", except_factors)
+      selectInput("variable", strong("Variables"), except_factors)
     }
 })
 
@@ -75,7 +53,8 @@ output$plotAnal <- renderUI({
     return(NULL)
   else{
     wellPanel(
-      style="background-color: WhiteSmoke;text-align : center;  margin-left : -15px; padding-bottom: 10px; padding-top: 10px; margin-top : 15px;",
+
+      style="background-color: WhiteSmoke; text-align : center;  margin-left : -15px; padding-bottom: 10px; padding-top: 15px; margin-top : 5px; margin-bottom: 40px;",
       column(6, uiOutput("plotType")),
       column(6, uiOutput("variInput")),
       plotOutput("plot"),
@@ -93,7 +72,8 @@ output$factorAnal <- renderUI({
   }
   else{
     wellPanel(
-      style = "background-color: WhiteSmoke; margin-top : 15px; padding-top: 15px; text-align: center;",
+
+      style = "background-color: WhiteSmoke; margin-top : 5px; margin-bottom: 100px; margin-left : -15px; padding-top: 15px; text-align: center;",
       uiOutput("factorInput"),
       uiOutput("tables"),
       br(),
@@ -112,7 +92,7 @@ output$rawData <- renderUI({
     return (NULL)
   }
   else {
-    wellPanel(style = "background-color: WhiteSmoke; margin-top : 15px; margin-bottom: 50px;",dataTableOutput('dataTable'))
+    wellPanel(style = "background-color: WhiteSmoke; margin-top : 15px; margin-bottom: 20px; margin-right: 15px;",dataTableOutput('dataTable'))
   }
 
 })
@@ -167,7 +147,7 @@ output$factorInput <- renderUI({
     if(is.null(inFile))
       return(NULL)
     else{
-      selectInput("factorSelector", "Factor variables", factors)
+      selectInput("factorSelector", strong("Factor variables"), factors)
     }
 })
 

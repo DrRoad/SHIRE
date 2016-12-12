@@ -1,6 +1,5 @@
 # model generator.  
-
-tabPanel(title = "Linear Regression",style ="padding-top: 15px; padding-bottom: 15px;",
+tabPanel(title = "Linear Regression",value ="linear",style ="padding-top: 20px; padding-bottom: 15px;",
     
     sidebarLayout(
         
@@ -40,3 +39,4 @@ tabPanel(title = "Linear Regression",style ="padding-top: 15px; padding-bottom: 
         
     )                             
 )
+

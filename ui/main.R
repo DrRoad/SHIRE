@@ -14,13 +14,13 @@ tabPanel("Welcome", style="margin-bottom: -5px;",
       column(6, offset =3,
         column(6,align='center',
           selectInput("techniques1", 
-            tags$div(id="supervised",icon("leaf", lib = "glyphicon"),strong("Supervised")), c("Linear regression", "Logistic regression", "Naive Bayes classifier","Artificial neural network", "Decision trees","k-nearest neighbor", "Support vector machines", "Random Forests","Boosting
-              ")
+            tags$div(id="supervised",icon("leaf", lib = "glyphicon"),strong("Supervised")), c("Learnings"="nothing","Linear regression" = "linear", "Logistic regression"="logistic", "Naive Bayes classifier"="naive","Artificial neural network"="neural", "Decision trees"="decision","k-nearest neighbor"="k-nearest", "Support vector machines"="SVM", "Random Forests"="forest","Boosting
+              "="boosting")
           )
         ),
         column(6, align='center',
            selectInput("techniques2", 
-            tags$div(id="unsupervised",icon("leaf", lib = "glyphicon"),strong("Unsupervised")), c("Association rule", "K-means algorithm","PCA")           
+            tags$div(id="unsupervised",icon("leaf", lib = "glyphicon"),strong("Unsupervised")), c("Learnings"="nothing","Association rule"="Arules", "K-means algorithm"="k-means","PCA"="PCA")           
             )
         )
       ),    

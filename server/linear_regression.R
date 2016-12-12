@@ -21,7 +21,7 @@ observeEvent(input$file1,{
           i<- i+1   
       }
 
-      output$dataTable <- renderDataTable(data, options = list(pageLength = 5)) 
+      output$dataTable <- renderDataTable(data, options = list(pageLength = 6)) 
   }
 
 })
@@ -142,11 +142,11 @@ output$tunningVari <- renderUI({
 
 observeEvent(input$addVariBox, {
   
-insertUI(
-		selector = "#evSelector",
-		where = "afterEnd",
-		ui = uiOutput("tunningVari")
-	)
+  insertUI(
+  		selector = "#evSelector",
+  		where = "afterEnd",
+  		ui = uiOutput("tunningVari")
+  	)
 })
 observeEvent(input$closeBox, {
 	removeUI(
