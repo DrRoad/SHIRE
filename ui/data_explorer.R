@@ -1,4 +1,5 @@
 
+
 tabPanel("Data explorer",value ="report", 
   fluidRow(
     column(11, style="margin-top: -40px;", uiOutput('reportTitle'),

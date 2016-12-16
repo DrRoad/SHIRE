@@ -1,4 +1,4 @@
 tabPanel("Logistic",value ="logistic", 
-  br(),br(),h3(style="font-family: Impact;","logistic"),
+  br(),h3(style="font-family: Impact;","Logistic Regression"),
   p("hello, we are working on it. :)")
 )

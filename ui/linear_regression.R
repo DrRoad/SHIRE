@@ -39,4 +39,3 @@ tabPanel(title = "Linear Regression",value ="linear",style ="padding-top: 20px; 
         
     )                             
 )
-
