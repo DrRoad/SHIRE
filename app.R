@@ -20,7 +20,6 @@ ui <- fluidPage( style = "background-color:white",useShinyjs(),
     tags$style(HTML("
       
 	      body {
-
 	      	  padding-top : 10px;
 	          padding-right : 15px;
 	          padding-left : 15px;
@@ -42,6 +41,7 @@ ui <- fluidPage( style = "background-color:white",useShinyjs(),
 	      }
 	      .shiny-output-error { visibility: hidden; } 
      	  .shiny-output-error:before { visibility: hidden; }
+	      .navbar { 
 	      	  padding-top : 5px;
 	          margin-bottom : -5px;
 	          margin-left : -30px;
@@ -112,7 +112,6 @@ ui <- fluidPage( style = "background-color:white",useShinyjs(),
 	  "))
     #menus > li:first-child { display: none; }
 
-
 	),theme =  shinytheme("simplex"),
   	navbarPage(title = tags$a(href="/",img(id="icon", src="icon.PNG", height= 80, width= 110)),collapsible = TRUE, id = "menus", 
 	  
@@ -121,6 +120,17 @@ ui <- fluidPage( style = "background-color:white",useShinyjs(),
 	    source(file.path("ui", "data_explorer.R"),  local = TRUE)$value,
 	    source(file.path("ui", "linear_regression.R"),  local = TRUE)$value,
 	    source(file.path("ui", "logistic_regression.R"),  local = TRUE)$value,
+	    source(file.path("ui", "naive_bayes.R"),  local = TRUE)$value,
+	    source(file.path("ui", "neural_network.R"),  local = TRUE)$value,
+	    source(file.path("ui", "decision_trees.R"),  local = TRUE)$value,
+	    source(file.path("ui", "k-nearest.R"),  local = TRUE)$value,
+	    source(file.path("ui", "svm.R"),  local = TRUE)$value,
+	    source(file.path("ui", "random_forests.R"),  local = TRUE)$value,
+	    source(file.path("ui", "boosting.R"),  local = TRUE)$value,
+	    source(file.path("ui", "arules.R"),  local = TRUE)$value,
+	    source(file.path("ui", "k-means.R"),  local = TRUE)$value,
+	    source(file.path("ui", "pca.R"),  local = TRUE)$value,
+	    
 	    fluidRow(
 	      column(12, 
 	        tags$img(id='footer',
