@@ -20,7 +20,7 @@ tabPanel("Welcome", style="margin-bottom: -5px;",
         ),
         column(6, align='center',
            selectInput("techniques2", 
-            tags$div(id="unsupervised",icon("leaf", lib = "glyphicon"),strong("Unsupervised")), c("Learnings"="nothing","* Association rule"="Arules", "* K-means algorithm"="k-means","* PCA"="PCA")           
+            tags$div(id="unsupervised",icon("leaf", lib = "glyphicon"),strong("Unsupervised")), c("Learnings"="nothing","Association rule"="Arules", "* K-means algorithm"="k-means","* PCA"="PCA")           
             )
         )
       ),    

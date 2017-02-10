@@ -16,7 +16,7 @@ tabPanel(title = "Linear Regression",value ="linear",style ="padding-top: 20px; 
             br(),
             h4(strong("Data Types")),
             uiOutput("dataType")
-          )
+          ),width= 3
         ),
         mainPanel(
             h4(strong("Model Visualization")),
@@ -35,6 +35,8 @@ tabPanel(title = "Linear Regression",value ="linear",style ="padding-top: 20px; 
             h5(strong("Model information")),
             uiOutput("modelMeasure"),
             br()
+            ,
+            width=9
         )
         
     )                             
