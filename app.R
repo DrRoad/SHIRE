@@ -8,12 +8,94 @@ library(maps)
 library(quantmod)
 library(shinydashboard)
 library(xts)
+library(arules)
+library(arulesViz)
+library(visNetwork)
+library(igraph)
+
 
 plots <- c(
-  "Histogram" = "hist",
-  "Boxplot" = "boxplot",
-  "Scatter" = "scatter"
+    "Histogram" = "hist",
+    "Boxplot" = "boxplot",
+    "Scatter" = "scatter"
 )
+ar_plots <- c(
+	"MinSupp" = "minSupp",
+	"TopN" = "topN"
+)
+ar_orderBy <- c(
+	"Support" = "support",
+	"Confidence" = "confidence",
+	"Lift" = "lift"
+)
+ar_howMany <- c(
+	"5" = "5",
+	"10" = "10",
+	"15" = "15",
+	"20" = "20",
+	"30" = "30"
+)
+
+withBusyIndicatorUI <- function(button) {
+  id <- button[['attribs']][['id']]
+  div(
+    `data-for-btn` = id,
+    button,
+    span(
+      class = "btn-loading-container",
+      hidden(
+        img(src = "ajax-loader-bar.gif", class = "btn-loading-indicator"),
+        icon("check", class = "btn-done-indicator")
+      )
+    ),
+    hidden(
+      div(class = "btn-err",
+          div(icon("exclamation-circle"),
+              tags$b("Error: "),
+              span(class = "btn-err-msg")
+          )
+      )
+    )
+  )
+}
+
+withBusyIndicatorServer <- function(buttonId, expr) {
+  
+  
+  	loadingEl <- sprintf("[data-for-btn=%s] .btn-loading-indicator", buttonId)
+  
+  # UX stuff: show the "busy" message, hide the other messages, disable the button
+  doneEl <- sprintf("[data-for-btn=%s] .btn-done-indicator", buttonId)
+  errEl <- sprintf("[data-for-btn=%s] .btn-err", buttonId)
+  shinyjs::disable(buttonId)
+  shinyjs::show(selector = loadingEl)
+  shinyjs::hide(selector = doneEl)
+  shinyjs::hide(selector = errEl)
+  on.exit({
+    shinyjs::enable(buttonId)
+    shinyjs::hide(selector = loadingEl)
+  })
+  
+  # Try to run the code when the button is clicked and show an error message if
+  # an error occurs or a success message if it completes
+  tryCatch({
+    value <- expr
+    shinyjs::show(selector = doneEl)
+    shinyjs::delay(2000, hide(selector = doneEl, anim = TRUE, animType = "fade", time = 0.5))
+    value
+  }, error = function(err) { errorFunc(err, buttonId) })
+}
+
+errorFunc <- function(err, buttonId) {
+  errEl <- sprintf("[data-for-btn=%s] .btn-err", buttonId)
+  errElMsg <- sprintf("[data-for-btn=%s] .btn-err-msg", buttonId)
+  errMessage <- gsub("^ddpcr: (.*)", "\\1", err$message)
+  html(html = errMessage, selector = errElMsg)
+  shinyjs::show(selector = errEl, anim = TRUE, animType = "fade")
+}
+
+
+
 
 ui <- fluidPage( style = "background-color:white",useShinyjs(),
   tags$head(tags$title("SHIRE"),
@@ -60,6 +142,45 @@ ui <- fluidPage( style = "background-color:white",useShinyjs(),
 	      .optgroup > div:second-child{
 	        display : none;
 	      }
+	      .btn-loading-container {
+		    margin-left: 10px;
+		    font-size: 1.2em;
+		  }
+		  .btn-fileread-indicator {
+		  	margin-top: 0px; 
+		   
+		    font-size: 1.2em;
+		  }
+		  .btn-loading-indicator {
+		  	margin-top: -25px; 
+		    margin-left: 150px;
+		    font-size: 1.2em;
+		  }
+		  .btn-done-indicator {
+		    color: green;
+		  }
+		  .btn-err {
+		    margin-top: 10px;
+		    color: red;
+		  }
+		  .controls {
+	        /* Appearance */
+	        background-color: Lavender;
+	        padding: 0px 0px 0px 0px;
+	        margin-left : -20px;
+	        cursor: move;
+	        position: absolute;
+	        z-index:3;
+	        /* Fade out while not hovering */
+	        opacity: 0.65;
+	        zoom: 0.9;
+	        transition: opacity 500ms;
+	      }
+	      .controls:hover {
+	        /* Fade in while hovering */
+	        opacity: 0.95;
+	        transition-delay: 0;
+	      }
 	      #icon{
 	        margin-top : -30px;
 	      }
@@ -90,24 +211,7 @@ ui <- fluidPage( style = "background-color:white",useShinyjs(),
 	          bottom:10px;
 	          z-index : -1;
 	      }
-	      #controls {
-	        /* Appearance */
-	        background-color: Lavender;
-	        padding: 0px 0px 0px 0px;
-	        margin-left : -20px;
-	        cursor: move;
-	        position: absolute;
-	        z-index:3;
-	        /* Fade out while not hovering */
-	        opacity: 0.65;
-	        zoom: 0.9;
-	        transition: opacity 500ms;
-	      }
-	      #controls:hover {
-	        /* Fade in while hovering */
-	        opacity: 0.95;
-	        transition-delay: 0;
-	      }
+	      
 	      
 	  "))
     #menus > li:first-child { display: none; }
@@ -117,7 +221,9 @@ ui <- fluidPage( style = "background-color:white",useShinyjs(),
 	  
 	    # include the UI for each tab
 	    source(file.path("ui", "main.R"),  local = TRUE)$value,
-	    source(file.path("ui", "data_explorer.R"),  local = TRUE)$value,
+	    source(file.path("ui", "de_linear.R"),  local = TRUE)$value,
+	    source(file.path("ui", "de_arules.R"),  local = TRUE)$value,
+	    source(file.path("ui", "de_pca.R"),  local = TRUE)$value,
 	    source(file.path("ui", "linear_regression.R"),  local = TRUE)$value,
 	    source(file.path("ui", "logistic_regression.R"),  local = TRUE)$value,
 	    source(file.path("ui", "naive_bayes.R"),  local = TRUE)$value,
@@ -130,6 +236,7 @@ ui <- fluidPage( style = "background-color:white",useShinyjs(),
 	    source(file.path("ui", "arules.R"),  local = TRUE)$value,
 	    source(file.path("ui", "k-means.R"),  local = TRUE)$value,
 	    source(file.path("ui", "pca.R"),  local = TRUE)$value,
+	    
 	    
 	    fluidRow(
 	      column(12, 
@@ -150,6 +257,12 @@ ui <- fluidPage( style = "background-color:white",useShinyjs(),
 
 server <- function(input, output, session) {
 
+# increase the limit of input file size.--------------------------
+options(shiny.maxRequestSize=30*1024^2) 
+
+shinyjs::hide(selector=".navbar li")
+# main & 
+# linear regression variables ------------------------------------
   data <- data.frame()
   vars <- c()
   commandLogs <- c()
@@ -164,7 +277,7 @@ server <- function(input, output, session) {
   except_factors <- c()
   factors <- c()
   childNum <- ""
-
+  
   reacVars <- eventReactive(input$insertVariBox,{})
   evMethod <<- reactive(input$exvaris)
   selectedEvs <<- reactive(input$evSelected) 
@@ -190,14 +303,43 @@ server <- function(input, output, session) {
   histQuery <<- reactive({
     paste(gsub(' ', '',paste('hist(data$',variSelected())),',main ="', paste("Histogram of",variSelected()),'")')
   })
+# arules variables  ------------------------------------------------
+  trans <<- list()
+  headItems <- c()
+  #de_arules.R
+  ar_minSuppSelected <<- reactive(input$ar_minSuppPoint)
+  ar_topNSelected <<- reactive(input$ar_topNPoint)
+  ar_plotSelected <<- reactive(input$ar_plotType) 
+
+  #arules.R 
+  ar_suppSelected <<- reactive(input$suppValue)
+  ar_cnfSelected <<- reactive(input$cnfValue)
+  ar_minlenSelected <<- reactive(input$minlenValue)
+  rulesCast <<- reactive(input$tunnedRules)
+  ar_orderBySelected <<- reactive(input$ar_orderBy)
+  ar_howManySelected <<- reactive(input$ar_howMany)
 
 
-  # Include the logic (server) for each tab
+  minSuppQuery <<- reactive({
+    paste("itemFrequencyPlot(trans, support=",(ar_minSuppSelected()*0.01), paste(",main='Items above",gsub(" ","",paste(ar_minSuppSelected(),"%")), "Support')")) 
+  })
+  topNQuery <<- reactive({
+  	paste("itemFrequencyPlot(trans, topN=", ar_topNSelected(), paste(",main='Top",ar_topNSelected(), "items')"))
+    
+  })	
+  
+# Include the logic (server) for each tab-----------------------------
   source(file.path("server", "main.R"),  local = TRUE)$value
-  source(file.path("server", "data_explorer.R"),  local = TRUE)$value
+  source(file.path("server", "de_linear.R"),  local = TRUE)$value
+  source(file.path("server", "de_arules.R"), local =TRUE)$value
+  source(file.path("server", "de_pca.R"), local =TRUE)$value
   source(file.path("server", "linear_regression.R"),  local = TRUE)$value
+  source(file.path("server", "arules.R"), local = TRUE)$value
    
 }
+
+
+
 
 shinyApp(ui = ui, server = server)
 
