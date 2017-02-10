@@ -7,40 +7,41 @@
     	{
     		shinyjs::hide(selector=".navbar li")
     		shinyjs::show(selector=".navbar li:nth-child(1)")
-    		shinyjs::show(selector=".navbar li:nth-child(2)")
     	}	 
     	else
     	{
-	      	inFile <- input$file1 
 
 	      	#setting the childNum 
 	      	switch(techSelected(),
 		      	"linear"={
-		      		childNum <- "3"
+		      		childNum <- "5"
+		      		de_childNum <- "2"
+		      		de_selected <- gsub(" ","",paste("de","_linear"))
+		      		inFile <- input$file
 		      	},
 		      	"logistic"={
-		      		childNum <- "4"
-		      	},
-		      	"naive"={
-		      		childNum <- "5"
-		      	},
-		      	"neural"={
 		      		childNum <- "6"
 		      	},
-		      	"decision"={
+		      	"naive"={
 		      		childNum <- "7"
 		      	},
-		      	"k-nearest"={
+		      	"neural"={
 		      		childNum <- "8"
 		      	},
-		      	"SVM"={
+		      	"decision"={
 		      		childNum <- "9"
 		      	},
-		      	"forest"={
+		      	"k-nearest"={
 		      		childNum <- "10"
 		      	},
-		      	"boosting"={
+		      	"SVM"={
 		      		childNum <- "11"
+		      	},
+		      	"forest"={
+		      		childNum <- "12"
+		      	},
+		      	"boosting"={
+		      		childNum <- "13"
 		      	}
 	      	)
 
@@ -50,18 +51,25 @@
 	      	pickmenu <- gsub(" ","", pickmenu)
 	      	pickmenu <- paste(".navbar", pickmenu)
 
+	      	# de_selector
+	      	pick_demenu <- "li:nth-child("
+	      	pick_demenu <- paste(pick_demenu, de_childNum,")")
+	      	pick_demenu <- gsub(" ", "", pick_demenu)
+	      	pick_demenu <- paste(".navbar", pick_demenu)
+
+
 	      	# go to the seleted page. 
 	      	if(is.null(inFile)){
 	      		shinyjs::hide(selector=".navbar li")
     			shinyjs::show(selector=".navbar li:nth-child(1)")
-    			shinyjs::show(selector=".navbar li:nth-child(2)")
-	      		shinyjs::show(selector=pickmenu)
-	      		updateNavbarPage(session, "menus", selected = "report")
+    			shinyjs::show(selector = pick_demenu)
+	      		shinyjs::show(selector= pickmenu)
+	      		updateNavbarPage(session, "menus", selected = de_selected)
 	      	}
 	      	else{
 	      		shinyjs::hide(selector=".navbar li")
     			shinyjs::show(selector=".navbar li:nth-child(1)")
-    			shinyjs::show(selector=".navbar li:nth-child(2)")
+    			shinyjs::show(selector = pick_demenu)
 	      		shinyjs::show(selector=pickmenu)
 	      		updateNavbarPage(session, "menus", selected = techSelected())
 	      	}
@@ -76,22 +84,26 @@
     	{
     		shinyjs::hide(selector=".navbar li")
     		shinyjs::show(selector=".navbar li:nth-child(1)")
-    		shinyjs::show(selector=".navbar li:nth-child(2)")
     	}	 
     	else
     	{
-	      	inFile <- input$file1 
 
 	      	#setting the childNum 
 	      	switch(techSelected2(),
 		      	"Arules"={
-		      		childNum <- "12"
+		      		childNum <- "14"
+		      		de_childNum <- "3"
+		      		de_selected <- gsub(" ","",paste("de","_arules"))
+		      		inFile <- input$file2 
 		      	},
 		      	"k-means"={
-		      		childNum <- "13"
+		      		childNum <- "15"
 		      	},
 		      	"PCA"={
-		      		childNum <- "14"
+		      		childNum <- "16"
+		      		de_childNum <- "4"
+		      		de_selected <- gsub(" ","",paste("de","_pca"))
+		      		inFile <- input$file3
 		      	}
 	      	)
 
@@ -100,20 +112,25 @@
 	      	pickmenu <- paste(pickmenu, childNum,")")
 	      	pickmenu <- gsub(" ","", pickmenu)
 	      	pickmenu <- paste(".navbar", pickmenu)
+	      	# de_selector
+	      	pick_demenu <- "li:nth-child("
+	      	pick_demenu <- paste(pick_demenu, de_childNum,")")
+	      	pick_demenu <- gsub(" ", "", pick_demenu)
+	      	pick_demenu <- paste(".navbar", pick_demenu)
 
 	      	# go to the seleted page. 
 	      	if(is.null(inFile)){
-	      		shinyjs::hide(selector=".navbar li")
-    			shinyjs::show(selector=".navbar li:nth-child(1)")
-    			shinyjs::show(selector=".navbar li:nth-child(2)")
-	      		shinyjs::show(selector=pickmenu)
-	      		updateNavbarPage(session, "menus", selected = "report")
+	      		shinyjs::hide(selector = ".navbar li")
+    			shinyjs::show(selector = ".navbar li:nth-child(1)")
+    			shinyjs::show(selector = pick_demenu)
+	      		shinyjs::show(selector = pickmenu)
+	      		updateNavbarPage(session, "menus", selected = de_selected)
 	      	}
 	      	else{
-	      		shinyjs::hide(selector=".navbar li")
-    			shinyjs::show(selector=".navbar li:nth-child(1)")
-    			shinyjs::show(selector=".navbar li:nth-child(2)")
-	      		shinyjs::show(selector=pickmenu)
+	      		shinyjs::hide(selector = ".navbar li")
+    			shinyjs::show(selector = ".navbar li:nth-child(1)")
+    			shinyjs::show(selector = pick_demenu)
+	      		shinyjs::show(selector = pickmenu)
 	      		updateNavbarPage(session, "menus", selected = techSelected2())
 	      	}
 	    }

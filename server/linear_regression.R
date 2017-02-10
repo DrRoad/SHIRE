@@ -1,31 +1,4 @@
-observeEvent(input$file1,{
-  inFile <- input$file1
 
-  if(!(is.null(inFile))){
-   # data read and analyze
-      data <<- read.csv(inFile$datapath, header = input$header)  
-      #var setting.
-      vars <<- colnames(data)
-      query <<- ""
-    
-      #except_factors
-      except_factors <<- colnames(data) 
-      factors <<- c()
-
-      i <- 1
-      while( i <= length(vars)){
-          if(is.factor(data[,vars[i]])){
-            except_factors <<- setdiff(except_factors, vars[i])
-            factors <<- union(factors, vars[i])
-          }
-          i<- i+1   
-      }
-
-      output$dataTable <- renderDataTable(data, options = list(pageLength = 6)) 
-  }
-
-})
-     
 
 #DV Selector
 output$dvSelector <- renderUI({
@@ -38,8 +11,6 @@ output$dvSelector <- renderUI({
     verbatimTextOutput("noData")
   }
   else{
-    
-   
     #  A defendent variable    
     selectInput("dfvari", 
          label = "DV(Defendent variable)", 
@@ -183,19 +154,14 @@ output$tunningBox <- renderUI({
   if(is.null(inFile)){
     return (NULL)
   }
-
   else{
 
     tempModel <<- "lm("
-
     tempModel <<- paste(tempModel, selectedDv(), "~") 
-  
     if(evMethod() == "all")
         evs <<- "."
-
     else if(evMethod() == "except_factors") 
         evs <<- setdiff(except_factors, selectedDv()) 
-
     else if(evMethod() == "select")
         evs <<- selectedEvs()
         
@@ -215,7 +181,7 @@ output$tunningBox <- renderUI({
 })
 
 
-#model accuracy & visualizing
+#model accuracy & visualizing -----------------------------
 output$modelMeasure <- renderUI({
   inFile <- input$file1 
   
@@ -234,17 +200,15 @@ output$modelMeasure <- renderUI({
         eval(parse(text=query))  
 
         output$modelAcc <- renderPrint({
-        # print(query)
-        summary(modelResult)
+          # print(query)
+          summary(modelResult)
         })
         verbatimTextOutput("modelAcc")
     }
   }
-    
-  
 })
 
-#model generator button
+#model generator button  --------------------------------------
 output$generateButton <- renderUI({
   inFile <- input$file1 
   
@@ -254,14 +218,10 @@ output$generateButton <- renderUI({
   actionButton("action","Generate Model", icon("grain", lib = "glyphicon"))
 })
 
-
-
 # Temporal sample model image
 output$model <- renderPlot({
-    if(input$action){
-      
+    if(input$action){      
       plot(modelResult, 1)
-
     }
 })
 
