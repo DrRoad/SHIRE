@@ -6,4 +6,4 @@ You can :
  - use your own .csv data.
  - tune your model to predict output more precisely.
  
-this project will be updated often from now onwards. :) 
+:)  
